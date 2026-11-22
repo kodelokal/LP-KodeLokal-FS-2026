@@ -24,6 +24,10 @@ export async function createPortfolioAction(formData: FormData) {
   const description = String(formData.get("description") || summary).trim();
   const imageUrl =
     String(formData.get("imageUrl") || "").trim() || "/portfolio/kriya-commerce.jpg";
+  const galleryImages = String(formData.get("galleryImages") || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
   const liveUrl = String(formData.get("liveUrl") || "").trim() || null;
   const projectYear = Number(formData.get("projectYear") || 2026) || 2026;
   const techStack = String(formData.get("techStack") || "")
@@ -43,6 +47,7 @@ export async function createPortfolioAction(formData: FormData) {
     summary,
     description,
     imageUrl,
+    galleryImages,
     liveUrl,
     projectYear,
     techStack,

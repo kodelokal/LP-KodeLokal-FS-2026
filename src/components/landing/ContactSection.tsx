@@ -1,18 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Send, Mail, MapPin, MessageCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { Send, Mail, MessageCircle, CheckCircle2, Loader2 } from "lucide-react";
 import type { SiteSettings, Service } from "@/db/schema";
 import { FadeIn } from "@/components/ui/MotionPrimitives";
 import { MascotPose } from "@/components/ui/MascotPose";
-
-const BUDGET_OPTIONS = [
-  "Di bawah Rp 5 Jt",
-  "Rp 5 Jt – Rp 10 Jt",
-  "Rp 10 Jt – Rp 25 Jt",
-  "Di atas Rp 25 Jt",
-  "Belum Ditentukan / Diskusi",
-];
 
 export function ContactSection({
   settings,
@@ -21,6 +13,13 @@ export function ContactSection({
   settings: SiteSettings;
   services: Service[];
 }) {
+  const serviceChoices = React.useMemo(() => {
+    const names = services.map((s) => s.title);
+    return names.length > 0
+      ? names
+      : ["Landing Page", "Aplikasi Web Custom", "E-Commerce", "Sistem & CMS"];
+  }, [services]);
+
   const [submitting, setSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -30,8 +29,8 @@ export function ContactSection({
     email: "",
     phone: "",
     company: "",
-    serviceInterest: services[0]?.title ?? "Landing Page & Company Profile",
-    budgetRange: BUDGET_OPTIONS[1],
+    serviceInterest: serviceChoices[0],
+    budgetRange: "Diskusi bareng mimin",
     message: "",
   });
 
@@ -48,7 +47,7 @@ export function ContactSection({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Gagal mengirim permintaan. Silakan periksa kembali isian Anda.");
+        setError(data.error || "Gagal kirim pesan, cek lagi isiannya ya!");
       } else {
         setSubmitted(true);
         setForm({
@@ -56,13 +55,13 @@ export function ContactSection({
           email: "",
           phone: "",
           company: "",
-          serviceInterest: services[0]?.title ?? "Landing Page & Company Profile",
-          budgetRange: BUDGET_OPTIONS[1],
+          serviceInterest: serviceChoices[0],
+          budgetRange: "Diskusi bareng mimin",
           message: "",
         });
       }
     } catch {
-      setError("Terjadi gangguan jaringan. Silakan coba lagi beberapa saat.");
+      setError("Lagi ada gangguan jaringan, coba sebentar lagi ya.");
     } finally {
       setSubmitting(false);
     }
@@ -73,128 +72,124 @@ export function ContactSection({
   )}`;
 
   return (
-    <section id="kontak" className="border-t border-line bg-subtle/45 py-20 sm:py-24">
+    <section
+      id="kontak"
+      className="relative overflow-hidden bg-[#0b1929] py-20 text-white sm:py-24 dark:border-t dark:border-line dark:bg-[#050d17]"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
-          {/* Left Column */}
-          <FadeIn className="lg:col-span-5">
-            <p className="text-xs font-bold tracking-widest text-brand-orange uppercase">
-              Yuk Ngobrol Santai
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-              Punya Ide Project? Spill Aja ke Mimin!
-            </h2>
-            <p className="mt-3 text-base leading-relaxed text-ink-secondary">
-              Nggak harus udah mateng banget kok konsepnya. Ceritain aja dulu maunya kayak gimana,
-              nanti mimin bantu kasih saran teknis dan estimasinya gratis dalam 1×24 jam.
-            </p>
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
+          {/* Left High-Contrast Editorial Column (matching bilcode.id dark CTA section) */}
+          <FadeIn className="flex flex-col justify-between lg:col-span-5">
+            <div>
+              <h2 className="text-4xl leading-[1.1] font-extrabold tracking-[-0.03em] text-white sm:text-5xl">
+                Siap mulai project bareng mimin?{" "}
+                <span className="text-brand-orange">Yuk diskusi.</span>
+              </h2>
+              <p className="mt-5 max-w-md text-sm leading-relaxed text-slate-300 sm:text-base">
+                Nggak harus udah mateng banget konsepnya. Spill aja dulu ide atau kendala bisnismu,
+                nanti mimin bantu kasih rekomendasi teknis &amp; estimasinya gratis.
+              </p>
 
-            <div className="mt-7 space-y-3.5 text-sm">
-              <a
-                href={waHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="surface-card flex items-center gap-3.5 rounded-2xl p-4 hover:border-brand-orange"
-              >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-brand-orange dark:bg-orange-500/15">
-                  <MessageCircle className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold text-ink-muted">Chat Mimin via WhatsApp</p>
-                  <p className="font-bold text-ink">+{settings.whatsappNumber}</p>
-                </div>
-              </a>
-
-              <a
-                href={`mailto:${settings.contactEmail}`}
-                className="surface-card flex items-center gap-3.5 rounded-2xl p-4 hover:border-brand-blue"
-              >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 text-brand-blue dark:bg-sky-500/15">
-                  <Mail className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold text-ink-muted">Email Resmi</p>
-                  <p className="font-bold text-ink">{settings.contactEmail}</p>
-                </div>
-              </a>
-
-              <div className="surface-card flex items-center gap-3.5 rounded-2xl p-4">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-subtle text-brand-blue">
-                  <MapPin className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold text-ink-muted">Basecamp</p>
-                  <p className="font-medium text-ink">{settings.officeAddress}</p>
-                </div>
+              <div className="mt-8 hidden sm:block">
+                <MascotPose pose="idea" size={125} />
               </div>
             </div>
 
-            <div className="mt-8 hidden lg:block">
-              <MascotPose pose="idea" size={145} bubble="Spill idemu di sini, mimin dengerin!" />
+            <div className="mt-10 space-y-2 border-t border-white/10 pt-6 text-sm">
+              <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+                Atau Langsung Hubungi Mimin
+              </p>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 pt-1">
+                <a
+                  href={`mailto:${settings.contactEmail}`}
+                  className="inline-flex items-center gap-2 font-semibold text-sky-300 hover:text-white"
+                >
+                  <Mail className="h-4 w-4" />
+                  {settings.contactEmail}
+                </a>
+                <a
+                  href={waHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 font-semibold text-orange-300 hover:text-white"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  +{settings.whatsappNumber}
+                </a>
+              </div>
             </div>
           </FadeIn>
 
-          {/* Right Form Column */}
-          <FadeIn delay={0.1} className="lg:col-span-7">
-            <div className="surface-card rounded-3xl p-6 sm:p-8">
+          {/* Right Dark Form with Pill Service Selector */}
+          <FadeIn delay={0.08} className="lg:col-span-7">
+            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 sm:p-8">
               {submitted ? (
                 <div className="flex flex-col items-center py-8 text-center">
-                  <MascotPose pose="yay" size={145} float={false} />
-                  <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3.5 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                  <MascotPose pose="yay" size={135} float={false} />
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3.5 py-1 text-xs font-bold text-emerald-300">
                     <CheckCircle2 className="h-4 w-4" />
-                    Pesan Masuk!
+                    Pesan Udah Masuk!
                   </div>
-                  <h3 className="mt-3 text-2xl font-extrabold text-ink">
-                    Mantap! Pesan Kamu Udah Masuk ke Mimin.
+                  <h3 className="mt-3 text-2xl font-extrabold text-white">
+                    Mantap! Mimin Segera Kabarin Kamu.
                   </h3>
-                  <p className="mt-2 max-w-md text-sm text-ink-secondary">
-                    Makasih udah mampir! Mimin bakal segera baca detail kebutuhan kamu dan kabarin
-                    balik lewat email atau WhatsApp ya.
+                  <p className="mt-2 max-w-md text-sm text-slate-300">
+                    Detail projectmu udah tercatat di dashboard KodeLokal. Mimin bakal balas lewat
+                    email atau WhatsApp maksimal 1×24 jam ya!
                   </p>
                   <button
                     type="button"
                     onClick={() => setSubmitted(false)}
-                    className="btn-secondary mt-6 text-sm"
+                    className="mt-6 rounded-full border border-white/20 px-5 py-2.5 text-xs font-bold text-white hover:bg-white/10"
                   >
                     Kirim Pesan Lainnya
                   </button>
                 </div>
               ) : (
-                <form id="contact-inquiry-form" onSubmit={handleSubmit} className="space-y-4">
+                <form id="contact-inquiry-form" onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="inq-name" className="mb-1.5 block text-xs font-bold text-ink">
-                        Nama Lengkap *
+                      <label
+                        htmlFor="inq-name"
+                        className="mb-1.5 block text-[11px] font-bold tracking-wider text-slate-300 uppercase"
+                      >
+                        Nama Kamu *
                       </label>
                       <input
                         id="inq-name"
                         required
                         type="text"
-                        placeholder="Contoh: Budi Santoso"
+                        placeholder="Masukkan nama kamu"
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        className="input-field"
+                        className="w-full rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-brand-blue focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label htmlFor="inq-email" className="mb-1.5 block text-xs font-bold text-ink">
-                        Email *
+                      <label
+                        htmlFor="inq-email"
+                        className="mb-1.5 block text-[11px] font-bold tracking-wider text-slate-300 uppercase"
+                      >
+                        Email Kamu *
                       </label>
                       <input
                         id="inq-email"
                         required
                         type="email"
-                        placeholder="nama@perusahaan.com"
+                        placeholder="nama@email.com"
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
-                        className="input-field"
+                        className="w-full rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-brand-blue focus:outline-none"
                       />
                     </div>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="inq-phone" className="mb-1.5 block text-xs font-bold text-ink">
+                      <label
+                        htmlFor="inq-phone"
+                        className="mb-1.5 block text-[11px] font-bold tracking-wider text-slate-300 uppercase"
+                      >
                         No. WhatsApp
                       </label>
                       <input
@@ -203,79 +198,73 @@ export function ContactSection({
                         placeholder="0812xxxxxxxx"
                         value={form.phone}
                         onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                        className="input-field"
+                        className="w-full rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-brand-blue focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label htmlFor="inq-company" className="mb-1.5 block text-xs font-bold text-ink">
-                        Bisnis / Perusahaan
+                      <label
+                        htmlFor="inq-company"
+                        className="mb-1.5 block text-[11px] font-bold tracking-wider text-slate-300 uppercase"
+                      >
+                        Brand / Usaha (opsional)
                       </label>
                       <input
                         id="inq-company"
                         type="text"
-                        placeholder="Nama brand atau instansi"
+                        placeholder="Nama brand / bisnis"
                         value={form.company}
                         onChange={(e) => setForm({ ...form, company: e.target.value })}
-                        className="input-field"
+                        className="w-full rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-brand-blue focus:outline-none"
                       />
                     </div>
                   </div>
 
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="inq-service" className="mb-1.5 block text-xs font-bold text-ink">
-                        Jenis Layanan
-                      </label>
-                      <select
-                        id="inq-service"
-                        value={form.serviceInterest}
-                        onChange={(e) => setForm({ ...form, serviceInterest: e.target.value })}
-                        className="input-field"
-                      >
-                        {services.map((s) => (
-                          <option key={s.id} value={s.title}>
-                            {s.title}
-                          </option>
-                        ))}
-                        <option value="Custom / Konsultasi Umum">Custom / Konsultasi Umum</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="inq-budget" className="mb-1.5 block text-xs font-bold text-ink">
-                        Estimasi Budget
-                      </label>
-                      <select
-                        id="inq-budget"
-                        value={form.budgetRange}
-                        onChange={(e) => setForm({ ...form, budgetRange: e.target.value })}
-                        className="input-field"
-                      >
-                        {BUDGET_OPTIONS.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
+                  {/* Interactive Service Pill Selector (like bilcode.id) */}
+                  <div>
+                    <p className="mb-2 text-[11px] font-bold tracking-wider text-slate-300 uppercase">
+                      Layanan yang Lagi Dicari
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {serviceChoices.map((choice) => {
+                        const selected = form.serviceInterest === choice;
+                        return (
+                          <button
+                            key={choice}
+                            type="button"
+                            onClick={() => setForm({ ...form, serviceInterest: choice })}
+                            className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors ${
+                              selected
+                                ? "bg-brand-blue text-white"
+                                : "border border-white/15 bg-white/[0.05] text-slate-200 hover:border-brand-orange hover:text-white"
+                            }`}
+                          >
+                            {choice}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="inq-message" className="mb-1.5 block text-xs font-bold text-ink">
+                    <label
+                      htmlFor="inq-message"
+                      className="mb-1.5 block text-[11px] font-bold tracking-wider text-slate-300 uppercase"
+                    >
                       Spill Kebutuhan Project Kamu *
                     </label>
                     <textarea
                       id="inq-message"
                       required
                       rows={4}
-                      placeholder="Ceritain santai aja — mau bikin website atau aplikasi apa, fitur utamanya apa, dan kira-kira target live kapan..."
+                      placeholder="Ceritain santai aja — mau bikin website atau aplikasi apa, fitur utama yang diinginkan, dan target waktu..."
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      className="input-field resize-y"
+                      className="w-full resize-y rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-brand-blue focus:outline-none"
                     />
                   </div>
 
                   {error && (
-                    <div className="rounded-xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">
+                    <div className="rounded-xl bg-rose-500/20 px-4 py-3 text-xs font-semibold text-rose-200">
                       {error}
                     </div>
                   )}
@@ -284,7 +273,7 @@ export function ContactSection({
                     id="inq-submit-btn"
                     type="submit"
                     disabled={submitting}
-                    className="btn-primary w-full text-sm disabled:opacity-60"
+                    className="btn-primary w-full rounded-full py-3.5 text-sm disabled:opacity-60"
                   >
                     {submitting ? (
                       <>

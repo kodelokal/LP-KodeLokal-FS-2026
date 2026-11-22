@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Star, Quote } from "lucide-react";
+import { ChevronDown, Star } from "lucide-react";
 import type { Testimonial, Faq } from "@/db/schema";
-import { FadeIn, StaggerGrid, StaggerCard } from "@/components/ui/MotionPrimitives";
-import { MascotPose } from "@/components/ui/MascotPose";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { StaggerGrid, StaggerCard } from "@/components/ui/MotionPrimitives";
 
 export function TestimonialsFaqSection({
   testimonials,
@@ -17,31 +17,25 @@ export function TestimonialsFaqSection({
   const [openFaqId, setOpenFaqId] = React.useState<string | null>(faqs[0]?.id ?? null);
 
   return (
-    <section id="faq" className="border-t border-line py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Testimonials */}
-        {testimonials.length > 0 && (
-          <div>
-            <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-              <FadeIn className="max-w-2xl">
-                <p className="text-xs font-bold tracking-widest text-brand-orange uppercase">
-                  Kata Mereka
-                </p>
-                <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-                  Review Jujur dari Klien yang Udah Bareng KodeLokal
-                </h2>
-              </FadeIn>
-              <FadeIn delay={0.08} className="hidden md:block">
-                <MascotPose pose="top" size={110} bubble="Bintang lima semua dong!" />
-              </FadeIn>
-            </div>
+    <div className="border-t border-line">
+      {/* TESTIMONI */}
+      {testimonials.length > 0 && (
+        <section className="py-20 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <SectionHeading
+              watermark="TESTIMONI"
+              titlePrefix="Apa Kata"
+              titleHighlight="Mereka?"
+              highlightColor="orange"
+              subtitle="Review jujur dari klien & founder yang udah mempercayakan website dan sistem bisnisnya bareng mimin KodeLokal."
+            />
 
-            <StaggerGrid className="mt-10 grid gap-6 md:grid-cols-3">
+            <StaggerGrid className="mt-12 grid gap-6 md:grid-cols-3">
               {testimonials.map((t) => (
                 <StaggerCard key={t.id}>
                   <blockquote className="surface-card flex h-full flex-col justify-between rounded-3xl p-6">
                     <div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <div className="flex gap-1">
                           {Array.from({ length: Math.min(5, Math.max(1, t.rating)) }).map((_, i) => (
                             <Star
@@ -50,61 +44,75 @@ export function TestimonialsFaqSection({
                             />
                           ))}
                         </div>
-                        <Quote className="h-5 w-5 text-line-strong" />
+                        <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[10px] font-bold text-brand-blue dark:bg-sky-500/20">
+                          Verified Client
+                        </span>
                       </div>
                       <p className="mt-4 text-sm leading-relaxed text-ink">“{t.quote}”</p>
                     </div>
-                    <footer className="mt-6 border-t border-line pt-4">
-                      <p className="text-sm font-bold text-ink">{t.clientName}</p>
-                      <p className="text-xs text-ink-secondary">
-                        {t.clientRole}, {t.companyName}
-                      </p>
+                    <footer className="mt-6 flex items-center gap-3 border-t border-line pt-4">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue/15 text-xs font-extrabold text-brand-blue">
+                        {t.clientName.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-ink">{t.clientName}</p>
+                        <p className="text-xs text-ink-secondary">
+                          {t.clientRole}, {t.companyName}
+                        </p>
+                      </div>
                     </footer>
                   </blockquote>
                 </StaggerCard>
               ))}
             </StaggerGrid>
           </div>
-        )}
+        </section>
+      )}
 
-        {/* FAQ */}
-        {faqs.length > 0 && (
-          <div className="mt-20 grid gap-10 lg:grid-cols-12 lg:items-start">
-            <FadeIn className="lg:col-span-4">
-              <p className="text-xs font-bold tracking-widest text-brand-blue uppercase">
-                Tanya Jawab
-              </p>
-              <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink">
-                Yang Sering Ditanyain ke Mimin
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-ink-secondary">
-                Masih bingung soal estimasi waktu, budget, atau fitur? Cek jawaban di samping, atau
-                langsung aja chat mimin di bawah ya!
-              </p>
-              <div className="mt-6 hidden lg:block">
-                <MascotPose pose="thinking" size={145} bubble="Masih bingung? Tanya mimin aja!" />
-              </div>
-            </FadeIn>
+      {/* FAQ (Centered stacked cards like bilcode.id) */}
+      {faqs.length > 0 && (
+        <section id="faq" className="border-t border-line py-20 sm:py-24">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <SectionHeading
+              watermark="FAQ"
+              titlePrefix="Pertanyaan yang Sering"
+              titleHighlight="Ditanyain ke Mimin"
+              highlightColor="blue"
+              subtitle="Masih bingung soal estimasi waktu, budget, atau cara pantau project? Cek jawaban cepatnya di bawah ya."
+            />
 
-            <div className="space-y-3 lg:col-span-8">
+            <div className="mt-10 space-y-3">
               {faqs.map((faq) => {
                 const isOpen = openFaqId === faq.id;
                 return (
-                  <div key={faq.id} className="surface-card overflow-hidden rounded-2xl">
+                  <div
+                    key={faq.id}
+                    className={`surface-card overflow-hidden rounded-2xl transition-colors ${
+                      isOpen ? "border-brand-blue/40" : ""
+                    }`}
+                  >
                     <button
                       type="button"
                       onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
                       aria-expanded={isOpen}
-                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                      className="flex w-full items-center justify-between gap-4 px-5 py-4.5 text-left"
                     >
                       <span className="text-sm font-bold text-ink sm:text-base">
                         {faq.question}
                       </span>
-                      <ChevronDown
-                        className={`h-5 w-5 shrink-0 text-brand-blue transition-transform duration-200 ${
-                          isOpen ? "rotate-180" : ""
+                      <span
+                        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors ${
+                          isOpen
+                            ? "bg-brand-blue text-white"
+                            : "bg-subtle text-ink-secondary"
                         }`}
-                      />
+                      >
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform duration-200 ${
+                            isOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </span>
                     </button>
                     <AnimatePresence initial={false}>
                       {isOpen && (
@@ -115,7 +123,7 @@ export function TestimonialsFaqSection({
                           transition={{ duration: 0.22 }}
                           className="overflow-hidden"
                         >
-                          <div className="border-t border-line px-5 pt-3 pb-5 text-sm leading-relaxed text-ink-secondary">
+                          <div className="px-5 pt-0 pb-5 text-sm leading-relaxed text-ink-secondary">
                             {faq.answer}
                           </div>
                         </motion.div>
@@ -126,8 +134,8 @@ export function TestimonialsFaqSection({
               })}
             </div>
           </div>
-        )}
-      </div>
-    </section>
+        </section>
+      )}
+    </div>
   );
 }

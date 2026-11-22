@@ -142,6 +142,7 @@ export const portfolios = pgTable("portfolios", {
   description: text("description").notNull(),
   techStack: jsonb("tech_stack").$type<string[]>().notNull().default([]),
   imageUrl: text("image_url").notNull(),
+  galleryImages: jsonb("gallery_images").$type<string[]>().notNull().default([]),
   liveUrl: text("live_url"),
   projectYear: integer("project_year").notNull().default(2026),
   featured: boolean("featured").notNull().default(false),

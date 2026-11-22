@@ -95,6 +95,17 @@ export default async function AdminPortfolioPage() {
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-xs font-bold text-ink">
+                Galeri Gambar Tambahan untuk Halaman Detail (opsional, 1 URL per baris)
+              </label>
+              <textarea
+                name="galleryImages"
+                rows={2}
+                placeholder={"/portfolio/showcase-devices.jpg\n/portfolio/showcase-tablet.jpg"}
+                className="input-field font-mono text-xs"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-bold text-ink">
                 Tech Stack (pisahkan dengan koma)
               </label>
               <input
@@ -163,7 +174,14 @@ export default async function AdminPortfolioPage() {
                   {item.category} · {item.projectYear}
                 </span>
               </div>
-              <h2 className="mt-1 text-lg font-bold text-ink">{item.title}</h2>
+              <a
+                href={`/portfolio/${item.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 block text-lg font-bold text-ink hover:text-brand-blue"
+              >
+                {item.title} ↗
+              </a>
               <p className="mt-1.5 line-clamp-2 text-xs text-ink-secondary">{item.summary}</p>
 
               {canWrite && (

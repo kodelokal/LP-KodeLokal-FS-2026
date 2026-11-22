@@ -146,6 +146,20 @@ export function Footer({ settings }: { settings: SiteSettings }) {
           <p className="font-mono">kodelokal.store</p>
         </div>
       </div>
+
+      {/* Floating WhatsApp Chat Mimin Pill */}
+      <a
+        href={`https://wa.me/${settings.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(
+          "Halo mimin KodeLokal! Aku mau tanya-tanya soal bikin website nih."
+        )}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat Mimin KodeLokal lewat WhatsApp"
+        className="fixed right-5 bottom-5 z-40 inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-emerald-600"
+      >
+        <span className="h-2 w-2 rounded-full bg-white" />
+        Chat Mimin
+      </a>
     </footer>
   );
 }

@@ -4,7 +4,7 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Network, LayoutGrid } from "lucide-react";
 import type { TeamMember } from "@/db/schema";
-import { FadeIn } from "@/components/ui/MotionPrimitives";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 
 type TeamNode = TeamMember & { children: TeamNode[] };
 
@@ -201,51 +201,44 @@ export function TeamStructureSection({ members }: { members: TeamMember[] }) {
   return (
     <section id="tim" className="border-t border-line bg-subtle/45 py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-          <FadeIn className="max-w-2xl">
-            <p className="text-xs font-bold tracking-widest text-brand-blue uppercase">
-              Struktur Tim Pengembang
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-              Kenalan Sama Tim di Balik Layar KodeLokal
-            </h2>
-            <p className="mt-3 text-base text-ink-secondary">
-              Ini dia squad pengembang yang siap bantu wujudin website &amp; aplikasi kamu biar
-              jalan mulus tanpa ribet.
-            </p>
-          </FadeIn>
+        <SectionHeading
+          watermark="TIM KAMI"
+          titlePrefix="Struktur & Tim"
+          titleHighlight="Pengembang"
+          highlightColor="blue"
+          subtitle="Ini dia squad di balik layar KodeLokal yang siap bantu wujudin website & aplikasi kamu biar jalan mulus."
+        />
 
-          {/* View Switcher */}
-          <FadeIn delay={0.08}>
-            <div className="inline-flex rounded-xl border border-line bg-surface p-1 shadow-xs">
-              <button
-                id="team-view-chart-btn"
-                type="button"
-                onClick={() => setViewMode("chart")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
-                  viewMode === "chart"
-                    ? "bg-brand-blue text-white"
-                    : "text-ink-secondary hover:text-ink"
-                }`}
-              >
-                <Network className="h-3.5 w-3.5" />
-                Bagan Struktur
-              </button>
-              <button
-                id="team-view-grid-btn"
-                type="button"
-                onClick={() => setViewMode("grid")}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
-                  viewMode === "grid"
-                    ? "bg-brand-blue text-white"
-                    : "text-ink-secondary hover:text-ink"
-                }`}
-              >
-                <LayoutGrid className="h-3.5 w-3.5" />
-                Daftar Tim
-              </button>
-            </div>
-          </FadeIn>
+        {/* Centered View Switcher */}
+        <div className="mt-8 flex justify-center">
+          <div className="inline-flex rounded-full border border-line bg-surface p-1 shadow-xs">
+            <button
+              id="team-view-chart-btn"
+              type="button"
+              onClick={() => setViewMode("chart")}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors ${
+                viewMode === "chart"
+                  ? "bg-brand-blue text-white"
+                  : "text-ink-secondary hover:text-ink"
+              }`}
+            >
+              <Network className="h-3.5 w-3.5" />
+              Bagan Struktur
+            </button>
+            <button
+              id="team-view-grid-btn"
+              type="button"
+              onClick={() => setViewMode("grid")}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors ${
+                viewMode === "grid"
+                  ? "bg-brand-blue text-white"
+                  : "text-ink-secondary hover:text-ink"
+              }`}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              Daftar Tim
+            </button>
+          </div>
         </div>
 
         <div className="mt-12">

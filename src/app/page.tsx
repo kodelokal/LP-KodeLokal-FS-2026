@@ -21,8 +21,8 @@ export default async function HomePage() {
       <main className="flex-1">
         <HeroSection settings={data.settings} />
         <ServicesSection services={data.services} />
-        <PortfolioSection portfolios={data.portfolios} />
         <WorkflowSection />
+        <PortfolioSection portfolios={data.portfolios} />
         <TeamStructureSection members={data.teamMembers} />
         <TestimonialsFaqSection testimonials={data.testimonials} faqs={data.faqs} />
         <ContactSection settings={data.settings} services={data.services} />
