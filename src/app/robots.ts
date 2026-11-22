@@ -6,10 +6,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/track"],
+        allow: ["/", "/track", "/portfolio/"],
         disallow: ["/admin", "/login", "/api/"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   };
 }

@@ -8,7 +8,31 @@ import { ProjectTrackerClient } from "@/components/track/ProjectTrackerClient";
 export const metadata: Metadata = {
   title: "Lacak Progress Project Klien",
   description:
-    "Pantau perkembangan pengerjaan website dan aplikasi Anda di KodeLokal secara real-time menggunakan kode tracking.",
+    "Pantau perkembangan pengerjaan website dan aplikasi kamu di KodeLokal secara real-time menggunakan kode tracking.",
+  alternates: {
+    canonical: "/track",
+  },
+  openGraph: {
+    title: "Lacak Progress Project Klien | KodeLokal",
+    description:
+      "Masukkan kode tracking dari mimin KodeLokal untuk melihat progres milestone project kamu secara langsung.",
+    url: "/track",
+    images: [
+      {
+        url: "/brand/og-kodelokal.png",
+        width: 1200,
+        height: 630,
+        alt: "KodeLokal — Lacak Progress Project Klien",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lacak Progress Project Klien | KodeLokal",
+    description:
+      "Pantau progres pengerjaan website & aplikasi kamu di KodeLokal secara transparan.",
+    images: ["/brand/og-kodelokal.png"],
+  },
 };
 
 export const dynamic = "force-dynamic";

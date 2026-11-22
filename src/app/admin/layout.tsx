@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { inquiries } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { AdminShell } from "@/components/admin/AdminShell";
+
+export const metadata: Metadata = {
+  title: "Dashboard Admin & CMS",
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

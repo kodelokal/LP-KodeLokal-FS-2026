@@ -30,10 +30,34 @@ export async function generateMetadata({
   return {
     title: `${item.title} — Portofolio`,
     description: item.summary,
+    alternates: {
+      canonical: `/portfolio/${item.slug}`,
+    },
     openGraph: {
-      title: `${item.title} | KodeLokal`,
+      type: "article",
+      locale: "id_ID",
+      url: `/portfolio/${item.slug}`,
+      siteName: "KodeLokal — Mitra Digital Anda",
+      title: `${item.title} | Portofolio KodeLokal`,
       description: item.summary,
-      images: [{ url: item.imageUrl }],
+      images: [
+        {
+          url: item.imageUrl,
+          alt: `${item.title} — Karya KodeLokal untuk ${item.clientName}`,
+        },
+        {
+          url: "/brand/og-kodelokal.png",
+          width: 1200,
+          height: 630,
+          alt: "KodeLokal — Mitra Digital Anda",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${item.title} | Portofolio KodeLokal`,
+      description: item.summary,
+      images: [item.imageUrl],
     },
   };
 }
@@ -44,6 +68,7 @@ export default async function PortfolioDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kodelokal.store";
 
   const [[item], landing, currentUser] = await Promise.all([
     db
@@ -69,8 +94,53 @@ export default async function PortfolioDetailPage({
     ...(item.galleryImages ?? []).filter((img) => img && img !== item.imageUrl),
   ];
 
+  const resolveAbs = (u: string) => (u.startsWith("http") ? u : `${siteUrl}${u}`);
+  const portfolioJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CreativeWork",
+        name: item.title,
+        headline: item.title,
+        description: item.description || item.summary,
+        image: allImages.map(resolveAbs),
+        url: `${siteUrl}/portfolio/${item.slug}`,
+        dateCreated: String(item.projectYear),
+        keywords: (item.techStack ?? []).join(", "),
+        creator: {
+          "@type": "Organization",
+          name: "KodeLokal",
+          url: siteUrl,
+          logo: `${siteUrl}/brand/logo-full-light.png`,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Beranda", item: siteUrl },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Portofolio",
+            item: `${siteUrl}/#portofolio`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: item.title,
+            item: `${siteUrl}/portfolio/${item.slug}`,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioJsonLd) }}
+      />
       <Navbar isLoggedIn={Boolean(currentUser)} />
 
       <main className="flex-1 bg-canvas">

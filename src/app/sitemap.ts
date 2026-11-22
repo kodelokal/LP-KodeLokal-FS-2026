@@ -1,8 +1,14 @@
 import type { MetadataRoute } from "next";
+import { desc, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { portfolios } from "@/db/schema";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kodelokal.store";
-  return [
+
+  const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -16,4 +22,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
   ];
+
+  try {
+    const publishedPortfolios = await db
+      .select({ slug: portfolios.slug, updatedAt: portfolios.updatedAt })
+      .from(portfolios)
+      .where(eq(portfolios.isPublished, true))
+      .orderBy(desc(portfolios.updatedAt));
+
+    const portfolioRoutes: MetadataRoute.Sitemap = publishedPortfolios.map((p) => ({
+      url: `${baseUrl}/portfolio/${p.slug}`,
+      lastModified: p.updatedAt ?? new Date(),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    }));
+
+    return [...staticRoutes, ...portfolioRoutes];
+  } catch {
+    return staticRoutes;
+  }
 }
