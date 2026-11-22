@@ -10,8 +10,8 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 const NAV_LINKS = [
   { href: "/#layanan", label: "Layanan" },
   { href: "/#portofolio", label: "Portofolio" },
-  { href: "/#alur-kerja", label: "Alur Kerja" },
-  { href: "/#tim", label: "Struktur Tim" },
+  { href: "/#alur-kerja", label: "Cara Kerja" },
+  { href: "/#tim", label: "Tim Kami" },
   { href: "/#faq", label: "FAQ" },
 ];
 
@@ -62,7 +62,7 @@ export function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
             {isLoggedIn ? "Dashboard" : "Portal Tim"}
           </Link>
           <Link href="/#kontak" id="nav-cta-btn" className="btn-primary h-10 px-4 text-sm">
-            Mulai Project
+            Chat Mimin
             <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>

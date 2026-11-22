@@ -60,14 +60,14 @@ async function seed() {
       id: 1,
       brandName: "KodeLokal",
       tagline: "Mitra Digital Anda",
-      heroTitle: "Bangun Produk Digital yang Cepat, Rapi, dan Siap Tumbuh.",
+      heroTitle: "Bikin website & aplikasi nggak pake ribet, biar mimin yang beresin.",
       heroSubtitle:
-        "KodeLokal membantu bisnis, UMKM, dan startup di Indonesia merancang landing page berkonversi tinggi, aplikasi web custom, serta sistem manajemen terintegrasi dengan pemantauan project yang transparan.",
-      heroCtaPrimary: "Konsultasi Project Gratis",
-      heroCtaSecondary: "Jelajahi Portofolio",
-      aboutTitle: "Satu Tim Solid untuk Solusi Digital End-to-End",
+        "Dari landing page buat naikin jualan, toko online UMKM, sampai aplikasi web custom — tim KodeLokal siap bantu dari nol sampai live. Kamu tinggal pantau progresnya santai, mimin yang ngoding!",
+      heroCtaPrimary: "Ngobrol Sama Mimin",
+      heroCtaSecondary: "Kepoin Portofolio",
+      aboutTitle: "Satu Squad Solid buat Solusi Digital Kamu",
       aboutDescription:
-        "Kami menggabungkan desain antarmuka modern, arsitektur kode yang bersih, dan alur kerja transparan sehingga setiap klien dapat memantau perkembangan project secara langsung dari tahap konsep hingga peluncuran.",
+        "Kami bikin website dan aplikasi yang tampilannya kece, kodenya rapi, dan progresnya transparan — biar kamu bisa fokus gedein bisnis tanpa pusing urusan teknis.",
       whatsappNumber: "6281234567890",
       contactEmail: "halo@kodelokal.store",
       officeAddress: "Indonesia — Remote-First Digital Studio",
@@ -77,10 +77,10 @@ async function seed() {
         linkedin: "https://linkedin.com/company/kodelokal",
       },
       stats: [
-        { label: "Project Terselesaikan", value: "25+" },
-        { label: "Klien & Mitra Aktif", value: "18+" },
-        { label: "Kepuasan Klien", value: "99%" },
-        { label: "Transparansi Progress", value: "100%" },
+        { label: "Project udah live", value: "25+" },
+        { label: "Klien & partner hepi", value: "18+" },
+        { label: "Puas & repeat order", value: "99%" },
+        { label: "Progres transparan", value: "100%" },
       ],
     })
     .onConflictDoNothing({ target: siteSettings.id });

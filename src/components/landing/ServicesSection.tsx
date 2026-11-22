@@ -33,19 +33,20 @@ export function ServicesSection({ services }: { services: Service[] }) {
         <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <FadeIn className="max-w-2xl">
             <p className="text-xs font-bold tracking-widest text-brand-orange uppercase">
-              Layanan Kami
+              Bisa Bikin Apa Aja?
             </p>
             <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-              Solusi Pengembangan Digital yang Disesuaikan Kebutuhan Bisnis
+              Mau Web Simpel atau Sistem Ribet? Mimin Siap Gasin.
             </h2>
             <p className="mt-3 text-base text-ink-secondary">
-              Dari landing page siap konversi hingga sistem manajemen operasional full-stack,
-              setiap baris kode dirancang rapi agar mudah dikembangkan jangka panjang.
+              Pilih aja layanan yang paling cocok sama kebutuhan bisnismu sekarang. Semua mimin &amp;
+              tim kerjain rapi dari awal, enak dibuka di HP maupun laptop, dan gampang kamu kelola
+              sendiri nanti.
             </p>
           </FadeIn>
 
           <FadeIn delay={0.1} className="hidden md:block">
-            <MascotPose pose="coding" size={125} bubble="Kode rapi & siap skala!" />
+            <MascotPose pose="coding" size={125} bubble="Mimin lagi ngoding nih!" />
           </FadeIn>
         </div>
 
@@ -107,7 +108,7 @@ export function ServicesSection({ services }: { services: Service[] }) {
                           : "text-brand-blue hover:text-brand-blue-dark"
                       }`}
                     >
-                      Diskusikan Layanan Ini
+                      Tanya Mimin Soal Ini
                       <ArrowUpRight className="h-4 w-4" />
                     </Link>
                   </div>

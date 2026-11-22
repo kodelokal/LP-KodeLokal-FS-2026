@@ -69,7 +69,7 @@ export function ContactSection({
   }
 
   const waHref = `https://wa.me/${settings.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(
-    "Halo KodeLokal, saya ingin berdiskusi mengenai pembuatan website / aplikasi."
+    "Halo mimin KodeLokal! Aku mau tanya-tanya soal bikin website / aplikasi nih."
   )}`;
 
   return (
@@ -79,14 +79,14 @@ export function ContactSection({
           {/* Left Column */}
           <FadeIn className="lg:col-span-5">
             <p className="text-xs font-bold tracking-widest text-brand-orange uppercase">
-              Mulai Kolaborasi
+              Yuk Ngobrol Santai
             </p>
             <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-              Punya Ide Project? Mari Wujudkan Bersama KodeLokal.
+              Punya Ide Project? Spill Aja ke Mimin!
             </h2>
             <p className="mt-3 text-base leading-relaxed text-ink-secondary">
-              Ceritakan kebutuhan website, CMS, atau aplikasi bisnis Anda. Permintaan ini langsung
-              tercatat di sistem operasional kami dan akan ditindaklanjuti oleh tim dalam 1×24 jam.
+              Nggak harus udah mateng banget kok konsepnya. Ceritain aja dulu maunya kayak gimana,
+              nanti mimin bantu kasih saran teknis dan estimasinya gratis dalam 1×24 jam.
             </p>
 
             <div className="mt-7 space-y-3.5 text-sm">
@@ -100,7 +100,7 @@ export function ContactSection({
                   <MessageCircle className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-xs font-semibold text-ink-muted">WhatsApp Cepat</p>
+                  <p className="text-xs font-semibold text-ink-muted">Chat Mimin via WhatsApp</p>
                   <p className="font-bold text-ink">+{settings.whatsappNumber}</p>
                 </div>
               </a>
@@ -123,14 +123,14 @@ export function ContactSection({
                   <MapPin className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-xs font-semibold text-ink-muted">Studio</p>
+                  <p className="text-xs font-semibold text-ink-muted">Basecamp</p>
                   <p className="font-medium text-ink">{settings.officeAddress}</p>
                 </div>
               </div>
             </div>
 
             <div className="mt-8 hidden lg:block">
-              <MascotPose pose="idea" size={145} bubble="Yuk diskusi ide hebatmu!" />
+              <MascotPose pose="idea" size={145} bubble="Spill idemu di sini, mimin dengerin!" />
             </div>
           </FadeIn>
 
@@ -142,21 +142,21 @@ export function ContactSection({
                   <MascotPose pose="yay" size={145} float={false} />
                   <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3.5 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
                     <CheckCircle2 className="h-4 w-4" />
-                    Permintaan Terkirim
+                    Pesan Masuk!
                   </div>
                   <h3 className="mt-3 text-2xl font-extrabold text-ink">
-                    Terima Kasih! Pesan Anda Sudah Kami Terima.
+                    Mantap! Pesan Kamu Udah Masuk ke Mimin.
                   </h3>
                   <p className="mt-2 max-w-md text-sm text-ink-secondary">
-                    Tim KodeLokal akan segera meninjau kebutuhan project Anda dan menghubungi lewat
-                    email atau WhatsApp yang tercantum.
+                    Makasih udah mampir! Mimin bakal segera baca detail kebutuhan kamu dan kabarin
+                    balik lewat email atau WhatsApp ya.
                   </p>
                   <button
                     type="button"
                     onClick={() => setSubmitted(false)}
                     className="btn-secondary mt-6 text-sm"
                   >
-                    Kirim Permintaan Lainnya
+                    Kirim Pesan Lainnya
                   </button>
                 </div>
               ) : (
@@ -261,13 +261,13 @@ export function ContactSection({
 
                   <div>
                     <label htmlFor="inq-message" className="mb-1.5 block text-xs font-bold text-ink">
-                      Ceritakan Kebutuhan Project Anda *
+                      Spill Kebutuhan Project Kamu *
                     </label>
                     <textarea
                       id="inq-message"
                       required
                       rows={4}
-                      placeholder="Jelaskan secara singkat tujuan website/aplikasi, fitur utama yang diinginkan, serta target waktu peluncuran..."
+                      placeholder="Ceritain santai aja — mau bikin website atau aplikasi apa, fitur utamanya apa, dan kira-kira target live kapan..."
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                       className="input-field resize-y"
@@ -289,12 +289,12 @@ export function ContactSection({
                     {submitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Mengirim Permintaan...
+                        Lagi Dikirim ke Mimin...
                       </>
                     ) : (
                       <>
                         <Send className="h-4 w-4" />
-                        Kirim Permintaan Konsultasi
+                        Kirim ke Mimin
                       </>
                     )}
                   </button>

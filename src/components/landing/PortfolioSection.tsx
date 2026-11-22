@@ -37,19 +37,19 @@ export function PortfolioSection({ portfolios }: { portfolios: Portfolio[] }) {
         <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <FadeIn className="max-w-2xl">
             <p className="text-xs font-bold tracking-widest text-brand-blue uppercase">
-              Hasil Portofolio
+              Hasil Karya Kami
             </p>
             <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-              Karya Nyata untuk Klien di Berbagai Industri
+              Nih, Beberapa Project yang Udah Mimin &amp; Tim Beresin
             </h2>
             <p className="mt-3 text-base text-ink-secondary">
-              Setiap project dikelola langsung melalui CMS KodeLokal. Klik salah satu karya untuk
-              melihat detail arsitektur dan teknologi yang digunakan.
+              Biar nggak dikira omon-omon doang, klik aja salah satu karya di bawah buat kepoin
+              cerita pengerjaan dan teknologi di baliknya.
             </p>
           </FadeIn>
 
           <FadeIn delay={0.1} className="hidden md:block">
-            <MascotPose pose="yay" size={118} bubble="Lihat hasil karya kami!" />
+            <MascotPose pose="yay" size={118} bubble="Asik, banyak yang udah live!" />
           </FadeIn>
         </div>
 

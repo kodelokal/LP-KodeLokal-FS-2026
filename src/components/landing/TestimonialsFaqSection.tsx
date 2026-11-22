@@ -25,14 +25,14 @@ export function TestimonialsFaqSection({
             <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
               <FadeIn className="max-w-2xl">
                 <p className="text-xs font-bold tracking-widest text-brand-orange uppercase">
-                  Testimoni Klien
+                  Kata Mereka
                 </p>
                 <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-                  Dipercaya Mitra Bisnis & Founder
+                  Review Jujur dari Klien yang Udah Bareng KodeLokal
                 </h2>
               </FadeIn>
               <FadeIn delay={0.08} className="hidden md:block">
-                <MascotPose pose="top" size={110} bubble="Kualitas & komitmen no. 1!" />
+                <MascotPose pose="top" size={110} bubble="Bintang lima semua dong!" />
               </FadeIn>
             </div>
 
@@ -72,17 +72,17 @@ export function TestimonialsFaqSection({
           <div className="mt-20 grid gap-10 lg:grid-cols-12 lg:items-start">
             <FadeIn className="lg:col-span-4">
               <p className="text-xs font-bold tracking-widest text-brand-blue uppercase">
-                Pertanyaan Umum
+                Tanya Jawab
               </p>
               <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink">
-                Hal yang Sering Ditanyakan
+                Yang Sering Ditanyain ke Mimin
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-ink-secondary">
-                Masih bingung menentukan teknologi atau estimasi biaya? Tim KodeLokal siap
-                membantu merancang opsi paling efisien untuk kebutuhan Anda.
+                Masih bingung soal estimasi waktu, budget, atau fitur? Cek jawaban di samping, atau
+                langsung aja chat mimin di bawah ya!
               </p>
               <div className="mt-6 hidden lg:block">
-                <MascotPose pose="thinking" size={145} bubble="Ada pertanyaan lain?" />
+                <MascotPose pose="thinking" size={145} bubble="Masih bingung? Tanya mimin aja!" />
               </div>
             </FadeIn>
 

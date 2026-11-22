@@ -7,29 +7,29 @@ import { FadeIn, StaggerGrid, StaggerCard } from "@/components/ui/MotionPrimitiv
 const STEPS = [
   {
     num: "01",
-    title: "Discovery & Analisis Kebutuhan",
-    desc: "Kami memetakan target bisnis, struktur fitur, estimasi waktu, dan spesifikasi database agar tidak ada biaya tersembunyi.",
+    title: "Ngobrol & Spill Kebutuhan",
+    desc: "Ceritain aja dulu tujuan web atau aplikasimu. Nanti mimin bantu petain fitur, timeline, dan estimasi biayanya tanpa biaya tersembunyi.",
     icon: MessageSquareText,
     accent: "blue",
   },
   {
     num: "02",
-    title: "Desain UI/UX & Prototipe",
-    desc: "Penyusunan tampilan responsif desktop & mobile beserta identitas warna brand sebelum masuk ke tahap penulisan kode.",
+    title: "Bikin Tampilannya Dulu",
+    desc: "Sebelum masuk ngoding, tim desain bikin tampilan desktop & mobile yang sesuai karakter brand kamu biar sama-sama sreg.",
     icon: Palette,
     accent: "orange",
   },
   {
     num: "03",
-    title: "Pengembangan & Tracking Live",
-    desc: "Pengerjaan bertahap per milestone. Anda menerima kode tracking unik untuk memantau progress dan preview staging kapan saja.",
+    title: "Mimin Ngoding, Kamu Pantau",
+    desc: "Pengerjaan jalan per milestone. Kamu dapat kode tracking pribadi buat ngecek progres dan preview staging kapan pun mau.",
     icon: Terminal,
     accent: "blue",
   },
   {
     num: "04",
-    title: "QA Testing, Deploy & Garansi",
-    desc: "Optimasi kecepatan, deploy ke domain produksi Anda, pelatihan CMS, serta garansi pemeliharaan pasca peluncuran.",
+    title: "Testing, Live & Garansi",
+    desc: "Setelah dicek lintas perangkat dan beres semua, web langsung online di domainmu plus diajarin cara pakai CMS & garansi maintenance.",
     icon: Rocket,
     accent: "orange",
   },
@@ -41,14 +41,14 @@ export function WorkflowSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <FadeIn className="max-w-2xl">
           <p className="text-xs font-bold tracking-widest text-brand-orange uppercase">
-            Alur Kerja Transparan
+            Gimana Cara Kerjanya?
           </p>
           <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-            Empat Langkah Terstruktur dari Ide hingga Live
+            Nggak Pake Drama, Cuma 4 Langkah Santai Sampai Live
           </h2>
           <p className="mt-3 text-base text-ink-secondary">
-            Tidak perlu menebak-nebak status pengerjaan website Anda. Setiap tahap tercatat rapi
-            di sistem manajemen project KodeLokal.
+            Anti ghosting dan nggak perlu nebak-nebak project udah sampai mana. Semua tahapan
+            tercatat jelas dan bisa kamu pantau sendiri.
           </p>
         </FadeIn>
 
@@ -90,19 +90,19 @@ export function WorkflowSection() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-ink">
-                  Sudah Menjadi Klien KodeLokal?
+                  Lagi Jalan Project Bareng KodeLokal?
                 </h3>
                 <p className="mt-1 text-sm text-ink-secondary">
-                  Masukkan Kode Tracking Anda (contoh demo:{" "}
+                  Masukin aja kode tracking dari mimin (mau coba demo? pake{" "}
                   <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-xs font-bold text-brand-orange">
                     KL-2026-001
                   </code>
-                  ) untuk melihat persentase pengerjaan & milestone terbaru secara real-time.
+                  ) buat ngecek persentase pengerjaan dan milestone terbaru secara real-time.
                 </p>
               </div>
             </div>
             <Link href="/track" className="btn-blue shrink-0 text-sm">
-              Buka Lacak Project
+              Cek Progres Sekarang
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

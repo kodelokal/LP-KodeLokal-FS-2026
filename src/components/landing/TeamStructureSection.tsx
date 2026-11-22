@@ -207,11 +207,11 @@ export function TeamStructureSection({ members }: { members: TeamMember[] }) {
               Struktur Tim Pengembang
             </p>
             <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.025em] text-ink sm:text-4xl">
-              Tim di Balik Setiap Produk Digital KodeLokal
+              Kenalan Sama Tim di Balik Layar KodeLokal
             </h2>
             <p className="mt-3 text-base text-ink-secondary">
-              Kenali struktur tim pengembang kami yang saling berkolaborasi mewujudkan produk
-              digital terbaik untuk bisnis Anda.
+              Ini dia squad pengembang yang siap bantu wujudin website &amp; aplikasi kamu biar
+              jalan mulus tanpa ribet.
             </p>
           </FadeIn>
 
