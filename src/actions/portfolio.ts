@@ -59,6 +59,33 @@ export async function createPortfolioAction(formData: FormData) {
   revalidatePath("/admin/portfolio");
 }
 
+export async function updatePortfolioMediaAction(formData: FormData) {
+  await requirePermission("portfolio:write");
+
+  const id = String(formData.get("id") || "").trim();
+  const slug = String(formData.get("slug") || "").trim();
+  const imageUrl = String(formData.get("imageUrl") || "").trim();
+  const galleryImages = String(formData.get("galleryImages") || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (!id || !imageUrl) return;
+
+  await db
+    .update(portfolios)
+    .set({
+      imageUrl,
+      galleryImages,
+      updatedAt: new Date(),
+    })
+    .where(eq(portfolios.id, id));
+
+  revalidatePath("/");
+  if (slug) revalidatePath(`/portfolio/${slug}`);
+  revalidatePath("/admin/portfolio");
+}
+
 export async function togglePortfolioPublishAction(formData: FormData) {
   await requirePermission("portfolio:write");
   const id = String(formData.get("id") || "");

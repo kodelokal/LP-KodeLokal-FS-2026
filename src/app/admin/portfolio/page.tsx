@@ -1,15 +1,20 @@
 import Image from "next/image";
 import { asc, desc } from "drizzle-orm";
-import { Plus, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Plus, Eye, EyeOff, Trash2, Save } from "lucide-react";
 import { db } from "@/db";
 import { portfolios } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import {
   createPortfolioAction,
+  updatePortfolioMediaAction,
   togglePortfolioPublishAction,
   deletePortfolioAction,
 } from "@/actions/portfolio";
+import {
+  CloudinarySingleUpload,
+  CloudinaryMultiUpload,
+} from "@/components/admin/CloudinaryImageUpload";
 
 export default async function AdminPortfolioPage() {
   const user = await requireAuth();
@@ -23,12 +28,15 @@ export default async function AdminPortfolioPage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-bold tracking-widest text-brand-blue uppercase">CMS Portofolio</p>
+        <p className="text-xs font-bold tracking-widest text-brand-blue uppercase">
+          CMS Portofolio · Cloudinary Storage
+        </p>
         <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
           Kelola Hasil Portofolio KodeLokal
         </h1>
         <p className="mt-1 text-sm text-ink-secondary">
-          Tambahkan atau perbarui studi kasus yang tampil pada bagian Portofolio di halaman depan.
+          Upload gambar cover dan galeri tampilan studi kasus langsung ke Cloudinary untuk halaman{" "}
+          <code className="rounded bg-subtle px-1.5 py-0.5 font-mono text-xs">/portfolio/[slug]</code>.
         </p>
       </div>
 
@@ -80,37 +88,33 @@ export default async function AdminPortfolioPage() {
               <label className="mb-1 block text-xs font-bold text-ink">Tahun Project</label>
               <input name="projectYear" type="number" defaultValue={2026} className="input-field font-mono" />
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-bold text-ink">URL Gambar Cover</label>
-              <input
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-xs font-bold text-ink">
+                Gambar Cover Utama (Upload ke Cloudinary) *
+              </label>
+              <CloudinarySingleUpload
                 name="imageUrl"
-                defaultValue="/portfolio/kriya-commerce.jpg"
-                placeholder="/portfolio/... atau https://..."
-                className="input-field"
+                folder="portfolio"
+                label="Upload Cover Portofolio"
               />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-xs font-bold text-ink">
+                Galeri Gambar Tambahan untuk Halaman Detail (Upload ke Cloudinary)
+              </label>
+              <CloudinaryMultiUpload name="galleryImages" folder="portfolio" />
             </div>
             <div>
               <label className="mb-1 block text-xs font-bold text-ink">URL Live / Demo</label>
               <input name="liveUrl" type="url" placeholder="https://..." className="input-field" />
             </div>
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-bold text-ink">
-                Galeri Gambar Tambahan untuk Halaman Detail (opsional, 1 URL per baris)
-              </label>
-              <textarea
-                name="galleryImages"
-                rows={2}
-                placeholder={"/portfolio/showcase-devices.jpg\n/portfolio/showcase-tablet.jpg"}
-                className="input-field font-mono text-xs"
-              />
-            </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className="mb-1 block text-xs font-bold text-ink">
                 Tech Stack (pisahkan dengan koma)
               </label>
               <input
                 name="techStack"
-                placeholder="Next.js, TypeScript, Tailwind CSS, Neon PostgreSQL"
+                placeholder="Next.js, TypeScript, Tailwind CSS, Neon DB"
                 className="input-field font-mono text-sm"
               />
             </div>
@@ -183,6 +187,42 @@ export default async function AdminPortfolioPage() {
                 {item.title} ↗
               </a>
               <p className="mt-1.5 line-clamp-2 text-xs text-ink-secondary">{item.summary}</p>
+
+              {/* Inline Cloudinary Media Manager */}
+              {canWrite && (
+                <details className="mt-4 rounded-2xl border border-line bg-elevated/60 p-3.5">
+                  <summary className="cursor-pointer text-xs font-bold text-brand-blue">
+                    Kelola Cover &amp; Galeri Cloudinary ({(item.galleryImages ?? []).length + 1} foto)
+                  </summary>
+                  <form action={updatePortfolioMediaAction} className="mt-3 space-y-3">
+                    <input type="hidden" name="id" value={item.id} />
+                    <input type="hidden" name="slug" value={item.slug} />
+                    <div>
+                      <p className="mb-1 text-[11px] font-bold text-ink-secondary">Cover Utama</p>
+                      <CloudinarySingleUpload
+                        name="imageUrl"
+                        folder="portfolio"
+                        defaultValue={item.imageUrl}
+                        label="Ganti Cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="mb-1 text-[11px] font-bold text-ink-secondary">
+                        Galeri Tambahan (/portfolio/{item.slug})
+                      </p>
+                      <CloudinaryMultiUpload
+                        name="galleryImages"
+                        folder="portfolio"
+                        defaultValues={item.galleryImages ?? []}
+                      />
+                    </div>
+                    <button type="submit" className="btn-blue px-3.5 py-1.5 text-xs">
+                      <Save className="h-3.5 w-3.5" />
+                      Simpan Foto Portofolio
+                    </button>
+                  </form>
+                </details>
+              )}
 
               {canWrite && (
                 <div className="mt-4 flex items-center justify-between border-t border-line pt-4">

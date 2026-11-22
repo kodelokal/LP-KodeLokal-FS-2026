@@ -9,6 +9,7 @@ import {
   updateTeamMemberAction,
   deleteTeamMemberAction,
 } from "@/actions/team";
+import { CloudinarySingleUpload } from "@/components/admin/CloudinaryImageUpload";
 
 function getInitials(name: string): string {
   return name
@@ -32,14 +33,14 @@ export default async function AdminTeamPage() {
     <div className="space-y-8">
       <div>
         <p className="text-xs font-bold tracking-widest text-brand-blue uppercase">
-          Struktur Tim Pengembang
+          Struktur Tim Pengembang · Cloudinary Storage
         </p>
         <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
-          Kelola Anggota & Bagan Struktur Tim
+          Kelola Anggota &amp; Bagan Struktur Tim
         </h1>
         <p className="mt-1 text-sm text-ink-secondary">
-          Atur Foto, Nama, Jabatan, relasi atasan untuk Bagan Struktur, serta tautan GitHub,
-          LinkedIn, dan Instagram (opsional) yang tampil di halaman depan.
+          Upload foto anggota langsung ke Cloudinary, atur Nama, Jabatan, relasi atasan untuk
+          Bagan Struktur, serta tautan GitHub, LinkedIn, dan Instagram (opsional).
         </p>
       </div>
 
@@ -84,13 +85,23 @@ export default async function AdminTeamPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-bold text-ink">
-                URL Foto (opsional)
-              </label>
+              <label className="mb-1 block text-xs font-bold text-ink">Urutan Tampil</label>
               <input
+                name="sortOrder"
+                type="number"
+                defaultValue={members.length + 1}
+                className="input-field font-mono"
+              />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="mb-1.5 block text-xs font-bold text-ink">
+                Foto Profil (Upload ke Cloudinary — opsional)
+              </label>
+              <CloudinarySingleUpload
                 name="avatarUrl"
-                placeholder="https://... atau /team/foto.jpg"
-                className="input-field"
+                folder="team"
+                label="Upload Foto Anggota"
+                shape="circle"
               />
             </div>
             <div>
@@ -123,7 +134,7 @@ export default async function AdminTeamPage() {
                 className="input-field"
               />
             </div>
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2 lg:col-span-3">
               <label className="mb-1 block text-xs font-bold text-ink">
                 Melapor Kepada (Atasan di Bagan Struktur)
               </label>
@@ -135,15 +146,6 @@ export default async function AdminTeamPage() {
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-bold text-ink">Urutan Tampil</label>
-              <input
-                name="sortOrder"
-                type="number"
-                defaultValue={members.length + 1}
-                className="input-field font-mono"
-              />
             </div>
             <div className="sm:col-span-2 lg:col-span-3">
               <button type="submit" className="btn-primary text-sm">
@@ -228,13 +230,14 @@ export default async function AdminTeamPage() {
 
                 <div>
                   <label className="mb-1 block text-[11px] font-bold text-ink-secondary">
-                    URL Foto (opsional)
+                    Foto Profil (Cloudinary)
                   </label>
-                  <input
+                  <CloudinarySingleUpload
                     name="avatarUrl"
+                    folder="team"
                     defaultValue={m.avatarUrl ?? ""}
-                    placeholder="https://... atau /team/foto.jpg"
-                    className="input-field py-1.5 text-xs"
+                    label="Upload Foto"
+                    shape="circle"
                   />
                 </div>
 
