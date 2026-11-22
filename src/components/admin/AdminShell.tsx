@@ -16,6 +16,7 @@ import {
   LogOut,
   Menu,
   X,
+  Loader2,
 } from "lucide-react";
 import type { SafeUser } from "@/lib/auth";
 import { ROLE_META, hasPermission } from "@/lib/rbac";
@@ -42,6 +43,7 @@ export function AdminShell({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [loggingOut, setLoggingOut] = React.useState(false);
 
   const navGroups: { title: string; items: NavItem[] }[] = [
     {
@@ -110,9 +112,14 @@ export function AdminShell({
   ];
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
+    setLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+      router.refresh();
+    } finally {
+      setLoggingOut(false);
+    }
   }
 
   const roleMeta = ROLE_META[user.role];
@@ -207,11 +214,16 @@ export function AdminShell({
             <button
               id="admin-logout-btn"
               type="button"
+              disabled={loggingOut}
               onClick={handleLogout}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
             >
-              <LogOut className="h-3.5 w-3.5" />
-              Keluar
+              {loggingOut ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <LogOut className="h-3.5 w-3.5" />
+              )}
+              {loggingOut ? "Keluar..." : "Keluar"}
             </button>
           </div>
         </div>

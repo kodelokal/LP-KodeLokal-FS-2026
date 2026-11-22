@@ -6,6 +6,8 @@ import { db } from "@/db";
 import { portfolios } from "@/db/schema";
 import { requirePermission } from "@/lib/auth";
 
+export type ActionResult = { ok: boolean; message: string };
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -14,99 +16,167 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export async function createPortfolioAction(formData: FormData) {
-  await requirePermission("portfolio:write");
+export async function createPortfolioAction(formData: FormData): Promise<ActionResult> {
+  try {
+    await requirePermission("portfolio:write");
 
-  const title = String(formData.get("title") || "").trim();
-  const clientName = String(formData.get("clientName") || "").trim();
-  const category = String(formData.get("category") || "Web App").trim();
-  const summary = String(formData.get("summary") || "").trim();
-  const description = String(formData.get("description") || summary).trim();
-  const imageUrl =
-    String(formData.get("imageUrl") || "").trim() || "/portfolio/kriya-commerce.jpg";
-  const galleryImages = String(formData.get("galleryImages") || "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const liveUrl = String(formData.get("liveUrl") || "").trim() || null;
-  const projectYear = Number(formData.get("projectYear") || 2026) || 2026;
-  const techStack = String(formData.get("techStack") || "")
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
-  const featured = formData.get("featured") === "on";
+    const title = String(formData.get("title") || "").trim();
+    const clientName = String(formData.get("clientName") || "").trim();
+    const category = String(formData.get("category") || "Web App").trim();
+    const summary = String(formData.get("summary") || "").trim();
+    const description = String(formData.get("description") || summary).trim();
+    const imageUrl =
+      String(formData.get("imageUrl") || "").trim() || "/portfolio/kriya-commerce.jpg";
+    const galleryImages = String(formData.get("galleryImages") || "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const liveUrl = String(formData.get("liveUrl") || "").trim() || null;
+    const projectYear = Number(formData.get("projectYear") || 2026) || 2026;
+    const techStack = String(formData.get("techStack") || "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const featured = formData.get("featured") === "on";
+    const isPublished = formData.get("isPublished") !== "off";
 
-  if (!title || !clientName || !summary) return;
+    if (!title || !clientName || !summary) {
+      return { ok: false, message: "Judul, nama klien, dan ringkasan wajib diisi." };
+    }
 
-  const slug = `${slugify(title)}-${Date.now().toString(36).slice(-4)}`;
-  await db.insert(portfolios).values({
-    slug,
-    title,
-    clientName,
-    category,
-    summary,
-    description,
-    imageUrl,
-    galleryImages,
-    liveUrl,
-    projectYear,
-    techStack,
-    featured,
-    isPublished: true,
-  });
-
-  revalidatePath("/");
-  revalidatePath("/admin/portfolio");
-}
-
-export async function updatePortfolioMediaAction(formData: FormData) {
-  await requirePermission("portfolio:write");
-
-  const id = String(formData.get("id") || "").trim();
-  const slug = String(formData.get("slug") || "").trim();
-  const imageUrl = String(formData.get("imageUrl") || "").trim();
-  const galleryImages = String(formData.get("galleryImages") || "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  if (!id || !imageUrl) return;
-
-  await db
-    .update(portfolios)
-    .set({
+    const slug = `${slugify(title)}-${Date.now().toString(36).slice(-4)}`;
+    await db.insert(portfolios).values({
+      slug,
+      title,
+      clientName,
+      category,
+      summary,
+      description,
       imageUrl,
       galleryImages,
-      updatedAt: new Date(),
-    })
-    .where(eq(portfolios.id, id));
+      liveUrl,
+      projectYear,
+      techStack,
+      featured,
+      isPublished,
+    });
 
-  revalidatePath("/");
-  if (slug) revalidatePath(`/portfolio/${slug}`);
-  revalidatePath("/admin/portfolio");
+    revalidatePath("/");
+    revalidatePath("/admin/portfolio");
+    return { ok: true, message: "Portofolio baru berhasil ditambahkan!" };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Gagal menambahkan portofolio.",
+    };
+  }
 }
 
-export async function togglePortfolioPublishAction(formData: FormData) {
-  await requirePermission("portfolio:write");
-  const id = String(formData.get("id") || "");
-  const current = formData.get("current") === "true";
-  if (!id) return;
+export async function updatePortfolioAction(formData: FormData): Promise<ActionResult> {
+  try {
+    await requirePermission("portfolio:write");
 
-  await db
-    .update(portfolios)
-    .set({ isPublished: !current, updatedAt: new Date() })
-    .where(eq(portfolios.id, id));
+    const id = String(formData.get("id") || "").trim();
+    const existingSlug = String(formData.get("slug") || "").trim();
+    const title = String(formData.get("title") || "").trim();
+    const clientName = String(formData.get("clientName") || "").trim();
+    const category = String(formData.get("category") || "Web App").trim();
+    const summary = String(formData.get("summary") || "").trim();
+    const description = String(formData.get("description") || summary).trim();
+    const imageUrl =
+      String(formData.get("imageUrl") || "").trim() || "/portfolio/kriya-commerce.jpg";
+    const galleryImages = String(formData.get("galleryImages") || "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const liveUrl = String(formData.get("liveUrl") || "").trim() || null;
+    const projectYear = Number(formData.get("projectYear") || 2026) || 2026;
+    const sortOrder = Number(formData.get("sortOrder") || 0) || 0;
+    const techStack = String(formData.get("techStack") || "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const featured = formData.get("featured") === "on";
+    const isPublished = formData.get("isPublished") === "on";
 
-  revalidatePath("/");
-  revalidatePath("/admin/portfolio");
+    if (!id || !title || !clientName || !summary) {
+      return { ok: false, message: "Judul, nama klien, dan ringkasan wajib diisi." };
+    }
+
+    await db
+      .update(portfolios)
+      .set({
+        title,
+        clientName,
+        category,
+        summary,
+        description,
+        imageUrl,
+        galleryImages,
+        liveUrl,
+        projectYear,
+        sortOrder,
+        techStack,
+        featured,
+        isPublished,
+        updatedAt: new Date(),
+      })
+      .where(eq(portfolios.id, id));
+
+    revalidatePath("/");
+    if (existingSlug) revalidatePath(`/portfolio/${existingSlug}`);
+    revalidatePath("/admin/portfolio");
+    return { ok: true, message: "Perubahan portofolio berhasil disimpan!" };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Gagal memperbarui portofolio.",
+    };
+  }
 }
 
-export async function deletePortfolioAction(formData: FormData) {
-  await requirePermission("portfolio:write");
-  const id = String(formData.get("id") || "");
-  if (!id) return;
+export async function togglePortfolioPublishAction(
+  id: string,
+  current: boolean,
+  slug?: string
+): Promise<ActionResult> {
+  try {
+    await requirePermission("portfolio:write");
+    if (!id) return { ok: false, message: "ID portofolio tidak valid." };
 
-  await db.delete(portfolios).where(eq(portfolios.id, id));
-  revalidatePath("/");
-  revalidatePath("/admin/portfolio");
+    await db
+      .update(portfolios)
+      .set({ isPublished: !current, updatedAt: new Date() })
+      .where(eq(portfolios.id, id));
+
+    revalidatePath("/");
+    if (slug) revalidatePath(`/portfolio/${slug}`);
+    revalidatePath("/admin/portfolio");
+    return {
+      ok: true,
+      message: !current ? "Portofolio dipublikasikan!" : "Portofolio dijadikan draft.",
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Gagal mengubah status publikasi.",
+    };
+  }
+}
+
+export async function deletePortfolioAction(id: string): Promise<ActionResult> {
+  try {
+    await requirePermission("portfolio:write");
+    if (!id) return { ok: false, message: "ID portofolio tidak valid." };
+
+    await db.delete(portfolios).where(eq(portfolios.id, id));
+    revalidatePath("/");
+    revalidatePath("/admin/portfolio");
+    return { ok: true, message: "Portofolio berhasil dihapus." };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Gagal menghapus portofolio.",
+    };
+  }
 }
