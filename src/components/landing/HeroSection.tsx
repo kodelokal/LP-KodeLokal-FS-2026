@@ -61,7 +61,7 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
           }}
           className="absolute top-32 -left-2 hidden w-56 -rotate-3 overflow-hidden rounded-2xl border border-line bg-surface p-1.5 shadow-xl xl:left-0 lg:block"
         >
-          <Link href="/portfolio/kriya-marketplace-umkm" className="block overflow-hidden rounded-xl">
+          <Link href="/#portofolio" className="block overflow-hidden rounded-xl">
             <Image
               src="/portfolio/showcase-devices.jpg"
               alt="Preview karya e-commerce KodeLokal"
@@ -82,16 +82,16 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
           }}
           className="absolute bottom-2 left-10 hidden w-56 rounded-2xl border border-slate-700/60 bg-[#0d1f33] p-3.5 text-white shadow-xl xl:left-16 lg:block"
         >
-          <Link href="/track?code=KL-2026-001" className="block">
+          <Link href="/track" className="block">
             <div className="flex items-center justify-between text-[10px]">
               <span className="inline-flex items-center gap-1 font-mono font-bold text-orange-400">
                 <Compass className="h-3 w-3" />
-                KL-2026-001
+                PROJECT TRACKER
               </span>
-              <span className="font-mono font-bold text-sky-300">65%</span>
+              <span className="font-mono font-bold text-sky-300">LIVE</span>
             </div>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-700">
-              <div className="h-full w-[65%] rounded-full bg-brand-orange" />
+              <div className="h-full w-[72%] rounded-full bg-brand-orange" />
             </div>
             <p className="mt-2 text-[11px] font-medium text-slate-200">
               Pantau progres project real-time →
@@ -147,7 +147,7 @@ export function HeroSection({ settings }: { settings: SiteSettings }) {
           }}
           className="absolute top-38 -right-2 hidden w-56 rotate-3 overflow-hidden rounded-2xl border border-line bg-surface p-1.5 shadow-xl xl:right-0 lg:block"
         >
-          <Link href="/portfolio/shopflow-pos-inventaris" className="block overflow-hidden rounded-xl">
+          <Link href="/#portofolio" className="block overflow-hidden rounded-xl">
             <Image
               src="/portfolio/showcase-tablet.jpg"
               alt="Preview sistem dashboard KodeLokal"
