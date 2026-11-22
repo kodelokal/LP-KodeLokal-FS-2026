@@ -165,6 +165,7 @@ export const teamMembers = pgTable("team_members", {
   avatarUrl: text("avatar_url"),
   linkedinUrl: text("linkedin_url"),
   githubUrl: text("github_url"),
+  instagramUrl: text("instagram_url"),
   isOpenPosition: boolean("is_open_position").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   isVisible: boolean("is_visible").notNull().default(true),

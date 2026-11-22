@@ -3,38 +3,40 @@
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { teamMembers, type UserRole } from "@/db/schema";
+import { teamMembers } from "@/db/schema";
 import { requirePermission } from "@/lib/auth";
-import { ALL_ROLES } from "@/lib/rbac";
+
+function normalizeOptionalUrl(value: FormDataEntryValue | null): string | null {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")) {
+    return raw;
+  }
+  return `https://${raw}`;
+}
 
 export async function createTeamMemberAction(formData: FormData) {
   await requirePermission("team:write");
 
   const name = String(formData.get("name") || "").trim();
-  const rawRole = String(formData.get("roleCode") || "WORKER").trim() as UserRole;
-  const roleCode: UserRole = ALL_ROLES.includes(rawRole) ? rawRole : "WORKER";
   const positionTitle = String(formData.get("positionTitle") || "").trim();
-  const department = String(formData.get("department") || "Engineering").trim();
   const parentId = String(formData.get("parentId") || "").trim() || null;
-  const bio = String(formData.get("bio") || "").trim();
-  const skills = String(formData.get("skills") || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const isOpenPosition = formData.get("isOpenPosition") === "on";
+  const avatarUrl = normalizeOptionalUrl(formData.get("avatarUrl"));
+  const githubUrl = normalizeOptionalUrl(formData.get("githubUrl"));
+  const linkedinUrl = normalizeOptionalUrl(formData.get("linkedinUrl"));
+  const instagramUrl = normalizeOptionalUrl(formData.get("instagramUrl"));
   const sortOrder = Number(formData.get("sortOrder") || 10) || 10;
 
   if (!name || !positionTitle) return;
 
   await db.insert(teamMembers).values({
     name,
-    roleCode,
     positionTitle,
-    department,
     parentId,
-    bio,
-    skills,
-    isOpenPosition,
+    avatarUrl,
+    githubUrl,
+    linkedinUrl,
+    instagramUrl,
     sortOrder,
     isVisible: true,
   });
@@ -43,15 +45,34 @@ export async function createTeamMemberAction(formData: FormData) {
   revalidatePath("/admin/team");
 }
 
-export async function toggleTeamOpenPositionAction(formData: FormData) {
+export async function updateTeamMemberAction(formData: FormData) {
   await requirePermission("team:write");
-  const id = String(formData.get("id") || "");
-  const current = formData.get("current") === "true";
-  if (!id) return;
+
+  const id = String(formData.get("id") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+  const positionTitle = String(formData.get("positionTitle") || "").trim();
+  const rawParentId = String(formData.get("parentId") || "").trim() || null;
+  const parentId = rawParentId === id ? null : rawParentId;
+  const avatarUrl = normalizeOptionalUrl(formData.get("avatarUrl"));
+  const githubUrl = normalizeOptionalUrl(formData.get("githubUrl"));
+  const linkedinUrl = normalizeOptionalUrl(formData.get("linkedinUrl"));
+  const instagramUrl = normalizeOptionalUrl(formData.get("instagramUrl"));
+  const sortOrder = Number(formData.get("sortOrder") || 0) || 0;
+
+  if (!id || !name || !positionTitle) return;
 
   await db
     .update(teamMembers)
-    .set({ isOpenPosition: !current })
+    .set({
+      name,
+      positionTitle,
+      parentId,
+      avatarUrl,
+      githubUrl,
+      linkedinUrl,
+      instagramUrl,
+      sortOrder,
+    })
     .where(eq(teamMembers.id, id));
 
   revalidatePath("/");
