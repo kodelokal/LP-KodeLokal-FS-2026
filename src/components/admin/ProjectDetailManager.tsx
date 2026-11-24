@@ -14,8 +14,8 @@ import {
   CircleDashed,
   Loader2,
 } from "lucide-react";
-import type { ClientProject, ProjectMilestone, TaskStatus } from "@/db/schema";
-import { PROJECT_STATUS_META, PRIORITY_META, TASK_STATUS_META } from "@/lib/rbac";
+import type { ClientProject, ProjectMilestone, TaskStatus, UserRole } from "@/db/schema";
+import { PROJECT_STATUS_META, PRIORITY_META, TASK_STATUS_META, formatRupiah } from "@/lib/rbac";
 import {
   updateClientProjectAction,
   createMilestoneAction,
@@ -33,14 +33,20 @@ import {
 export function ProjectDetailManager({
   project,
   milestones,
+  workers = [],
   canWrite,
 }: {
   project: ClientProject;
   milestones: ProjectMilestone[];
+  workers?: { id: string; name: string; role: UserRole }[];
   canWrite: boolean;
 }) {
   const router = useRouter();
   const { toast, showToast, clearToast } = useAdminToast();
+  const workerNameById = React.useMemo(
+    () => new Map(workers.map((w) => [w.id, w.name])),
+    [workers]
+  );
 
   const [editProjectOpen, setEditProjectOpen] = React.useState(false);
   const [addMilestoneOpen, setAddMilestoneOpen] = React.useState(false);
@@ -269,7 +275,7 @@ export function ProjectDetailManager({
                   <div>
                     <p className="text-sm font-bold text-ink">{m.title}</p>
                     {m.description && <p className="text-xs text-ink-secondary">{m.description}</p>}
-                    <div className="mt-1.5 flex items-center gap-2">
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                           TASK_STATUS_META[m.status].badgeClass
@@ -277,6 +283,16 @@ export function ProjectDetailManager({
                       >
                         {TASK_STATUS_META[m.status].label}
                       </span>
+                      {m.assigneeId && workerNameById.has(m.assigneeId) && (
+                        <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-brand-blue dark:bg-sky-500/20">
+                          Worker: {workerNameById.get(m.assigneeId)}
+                        </span>
+                      )}
+                      {m.feeAmount > 0 && (
+                        <span className="font-mono text-[11px] font-bold text-brand-orange">
+                          {formatRupiah(m.feeAmount)}
+                        </span>
+                      )}
                       {m.dueDate && (
                         <span className="font-mono text-[11px] text-ink-muted">
                           Target: {m.dueDate}
@@ -445,6 +461,17 @@ export function ProjectDetailManager({
             <label className="mb-1 block text-xs font-bold text-ink">Deskripsi (opsional)</label>
             <textarea name="description" rows={2} className="input-field" />
           </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold text-ink">Tugaskan ke Worker (opsional)</label>
+            <select name="assigneeId" defaultValue="" className="input-field">
+              <option value="">— Belum Ditugaskan —</option>
+              {workers.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name} ({w.role})
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs font-bold text-ink">Status</label>
@@ -458,6 +485,16 @@ export function ProjectDetailManager({
             <div>
               <label className="mb-1 block text-xs font-bold text-ink">Target Tanggal</label>
               <input name="dueDate" type="date" className="input-field" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-bold text-ink">Fee Worker (Rp)</label>
+              <input name="feeAmount" type="number" min={0} defaultValue={0} className="input-field font-mono" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold text-ink">Estimasi Jam</label>
+              <input name="estimatedHours" type="number" min={0} defaultValue={0} className="input-field font-mono" />
             </div>
           </div>
           <div className="flex justify-end gap-2 border-t border-line pt-4">
@@ -516,6 +553,21 @@ export function ProjectDetailManager({
                 className="input-field"
               />
             </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold text-ink">Tugaskan ke Worker</label>
+              <select
+                name="assigneeId"
+                defaultValue={editingMilestone.assigneeId ?? ""}
+                className="input-field"
+              >
+                <option value="">— Belum Ditugaskan —</option>
+                {workers.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name} ({w.role})
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-bold text-ink">Status</label>
@@ -533,6 +585,28 @@ export function ProjectDetailManager({
                   type="date"
                   defaultValue={editingMilestone.dueDate ?? ""}
                   className="input-field"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-bold text-ink">Fee Worker (Rp)</label>
+                <input
+                  name="feeAmount"
+                  type="number"
+                  min={0}
+                  defaultValue={editingMilestone.feeAmount}
+                  className="input-field font-mono"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-bold text-ink">Estimasi Jam</label>
+                <input
+                  name="estimatedHours"
+                  type="number"
+                  min={0}
+                  defaultValue={editingMilestone.estimatedHours}
+                  className="input-field font-mono"
                 />
               </div>
             </div>

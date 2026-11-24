@@ -209,9 +209,9 @@ export default async function AdminOverviewPage() {
                 <HardHat className="h-5 w-5" />
               </span>
               <div>
-                <p className="text-sm font-bold text-ink">Worker Hub (Segera Hadir)</p>
+                <p className="text-sm font-bold text-ink">KodeLokal Worker Hub</p>
                 <p className="text-xs text-ink-secondary">
-                  Lihat kesiapan skema penugasan Worker & RBAC.
+                  Kelola penugasan milestone, timesheet, workload, dan komisi worker.
                 </p>
               </div>
             </div>

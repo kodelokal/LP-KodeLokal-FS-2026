@@ -57,6 +57,18 @@ export const taskStatusEnum = pgEnum("task_status", [
   "DONE",
 ]);
 
+export const workerAvailabilityEnum = pgEnum("worker_availability", [
+  "AVAILABLE",
+  "BUSY",
+  "ON_LEAVE",
+]);
+
+export const payoutStatusEnum = pgEnum("payout_status", [
+  "PENDING",
+  "APPROVED",
+  "PAID",
+]);
+
 // ============================================================================
 // AUTH & RBAC TABLES
 // ============================================================================
@@ -232,8 +244,69 @@ export const projectMilestones = pgTable("project_milestones", {
   status: taskStatusEnum("status").notNull().default("TODO"),
   dueDate: date("due_date"),
   assigneeId: uuid("assignee_id").references(() => users.id, { onDelete: "set null" }),
+  feeAmount: integer("fee_amount").notNull().default(0),
+  estimatedHours: integer("estimated_hours").notNull().default(0),
   sortOrder: integer("sort_order").notNull().default(0),
   completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// ============================================================================
+// WORKER HUB TABLES (PROFILES, TIMESHEET WORK LOGS, PAYOUTS)
+// ============================================================================
+
+export const workerProfiles = pgTable("worker_profiles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  specialty: text("specialty").notNull().default("Full-Stack Developer"),
+  skills: jsonb("skills").$type<string[]>().notNull().default([]),
+  availability: workerAvailabilityEnum("availability").notNull().default("AVAILABLE"),
+  hourlyRate: integer("hourly_rate").notNull().default(0),
+  bankName: text("bank_name"),
+  bankAccountNumber: text("bank_account_number"),
+  bankAccountHolder: text("bank_account_holder"),
+  portfolioUrl: text("portfolio_url"),
+  notes: text("notes"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const workerWorkLogs = pgTable("worker_work_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workerId: uuid("worker_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => clientProjects.id, { onDelete: "cascade" }),
+  milestoneId: uuid("milestone_id").references(() => projectMilestones.id, {
+    onDelete: "set null",
+  }),
+  workDate: date("work_date").notNull(),
+  durationMinutes: integer("duration_minutes").notNull().default(60),
+  summary: text("summary").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const workerPayouts = pgTable("worker_payouts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workerId: uuid("worker_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  projectId: uuid("project_id").references(() => clientProjects.id, {
+    onDelete: "set null",
+  }),
+  milestoneId: uuid("milestone_id").references(() => projectMilestones.id, {
+    onDelete: "set null",
+  }),
+  title: text("title").notNull(),
+  amount: integer("amount").notNull().default(0),
+  status: payoutStatusEnum("status").notNull().default("PENDING"),
+  paymentMethod: text("payment_method"),
+  paidAt: timestamp("paid_at", { withTimezone: true }),
+  notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -254,10 +327,16 @@ export const inquiries = pgTable("inquiries", {
 // DRIZZLE RELATIONS
 // ============================================================================
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   sessions: many(sessions),
   managedProjects: many(clientProjects),
   assignedMilestones: many(projectMilestones),
+  workerProfile: one(workerProfiles, {
+    fields: [users.id],
+    references: [workerProfiles.userId],
+  }),
+  workLogs: many(workerWorkLogs),
+  payouts: many(workerPayouts),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -273,6 +352,8 @@ export const clientProjectsRelations = relations(clientProjects, ({ one, many })
     references: [users.id],
   }),
   milestones: many(projectMilestones),
+  workLogs: many(workerWorkLogs),
+  payouts: many(workerPayouts),
 }));
 
 export const projectMilestonesRelations = relations(projectMilestones, ({ one }) => ({
@@ -286,12 +367,51 @@ export const projectMilestonesRelations = relations(projectMilestones, ({ one })
   }),
 }));
 
+export const workerProfilesRelations = relations(workerProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [workerProfiles.userId],
+    references: [users.id],
+  }),
+}));
+
+export const workerWorkLogsRelations = relations(workerWorkLogs, ({ one }) => ({
+  worker: one(users, {
+    fields: [workerWorkLogs.workerId],
+    references: [users.id],
+  }),
+  project: one(clientProjects, {
+    fields: [workerWorkLogs.projectId],
+    references: [clientProjects.id],
+  }),
+  milestone: one(projectMilestones, {
+    fields: [workerWorkLogs.milestoneId],
+    references: [projectMilestones.id],
+  }),
+}));
+
+export const workerPayoutsRelations = relations(workerPayouts, ({ one }) => ({
+  worker: one(users, {
+    fields: [workerPayouts.workerId],
+    references: [users.id],
+  }),
+  project: one(clientProjects, {
+    fields: [workerPayouts.projectId],
+    references: [clientProjects.id],
+  }),
+  milestone: one(projectMilestones, {
+    fields: [workerPayouts.milestoneId],
+    references: [projectMilestones.id],
+  }),
+}));
+
 export type User = typeof users.$inferSelect;
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
 export type ProjectStatus = (typeof projectStatusEnum.enumValues)[number];
 export type ProjectPriority = (typeof projectPriorityEnum.enumValues)[number];
 export type InquiryStatus = (typeof inquiryStatusEnum.enumValues)[number];
 export type TaskStatus = (typeof taskStatusEnum.enumValues)[number];
+export type WorkerAvailability = (typeof workerAvailabilityEnum.enumValues)[number];
+export type PayoutStatus = (typeof payoutStatusEnum.enumValues)[number];
 export type SiteSettings = typeof siteSettings.$inferSelect;
 export type Service = typeof services.$inferSelect;
 export type Portfolio = typeof portfolios.$inferSelect;
@@ -300,4 +420,7 @@ export type Testimonial = typeof testimonials.$inferSelect;
 export type Faq = typeof faqs.$inferSelect;
 export type ClientProject = typeof clientProjects.$inferSelect;
 export type ProjectMilestone = typeof projectMilestones.$inferSelect;
+export type WorkerProfile = typeof workerProfiles.$inferSelect;
+export type WorkerWorkLog = typeof workerWorkLogs.$inferSelect;
+export type WorkerPayout = typeof workerPayouts.$inferSelect;
 export type Inquiry = typeof inquiries.$inferSelect;

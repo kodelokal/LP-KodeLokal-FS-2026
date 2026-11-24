@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { clientProjects, projectMilestones } from "@/db/schema";
+import { clientProjects, projectMilestones, users } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import { ProjectDetailManager } from "@/components/admin/ProjectDetailManager";
@@ -23,11 +23,25 @@ export default async function AdminProjectDetailPage({
 
   if (!project) notFound();
 
-  const milestones = await db
-    .select()
-    .from(projectMilestones)
-    .where(eq(projectMilestones.projectId, project.id))
-    .orderBy(asc(projectMilestones.sortOrder), asc(projectMilestones.createdAt));
+  const [milestones, workers] = await Promise.all([
+    db
+      .select()
+      .from(projectMilestones)
+      .where(eq(projectMilestones.projectId, project.id))
+      .orderBy(asc(projectMilestones.sortOrder), asc(projectMilestones.createdAt)),
+    db
+      .select({ id: users.id, name: users.name, role: users.role })
+      .from(users)
+      .where(ne(users.role, "CLIENT"))
+      .orderBy(asc(users.name)),
+  ]);
 
-  return <ProjectDetailManager project={project} milestones={milestones} canWrite={canWrite} />;
+  return (
+    <ProjectDetailManager
+      project={project}
+      milestones={milestones}
+      workers={workers}
+      canWrite={canWrite}
+    />
+  );
 }

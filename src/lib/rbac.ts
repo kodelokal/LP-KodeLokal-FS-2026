@@ -4,6 +4,8 @@ import type {
   ProjectPriority,
   InquiryStatus,
   TaskStatus,
+  WorkerAvailability,
+  PayoutStatus,
 } from "@/db/schema";
 
 export const ALL_ROLES: UserRole[] = [
@@ -27,25 +29,25 @@ export const ROLE_META: Record<
 > = {
   CEO: {
     label: "CEO",
-    shortDesc: "Akses penuh ke seluruh sistem, strategi, CMS, project, dan manajemen tim.",
+    shortDesc: "Akses penuh ke seluruh sistem, strategi, CMS, project, worker, dan manajemen tim.",
     badgeClass:
       "bg-orange-100 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300",
   },
   CTO: {
     label: "CTO",
-    shortDesc: "Akses penuh ke arsitektur teknis, CMS, project client, dan manajemen tim.",
+    shortDesc: "Akses penuh ke arsitektur teknis, CMS, project client, worker hub, dan manajemen tim.",
     badgeClass:
       "bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300",
   },
   ADMIN: {
     label: "Admin",
-    shortDesc: "Mengelola CMS, portofolio, project client, inquiry, serta akun operasional.",
+    shortDesc: "Mengelola CMS, portofolio, project client, worker payout, inquiry, serta akun operasional.",
     badgeClass:
       "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300",
   },
   PM: {
     label: "Project Manager",
-    shortDesc: "Mengelola project client, timeline milestone, dan konversi inquiry.",
+    shortDesc: "Mengelola project client, pembagian tugas worker, timeline milestone, dan inquiry.",
     badgeClass:
       "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
   },
@@ -57,10 +59,9 @@ export const ROLE_META: Record<
   },
   WORKER: {
     label: "Worker",
-    shortDesc: "Eksekusi milestone & tugas teknis project (Modul Worker Hub segera hadir).",
+    shortDesc: "Eksekusi milestone project, catat timesheet jam kerja, dan pantau komisi di Worker Hub.",
     badgeClass:
       "bg-slate-200 text-slate-800 dark:bg-slate-700/60 dark:text-slate-200",
-    isSoon: true,
   },
   CLIENT: {
     label: "Client",
@@ -77,6 +78,8 @@ export type PermissionKey =
   | "projects:write"
   | "inquiries:write"
   | "users:manage"
+  | "workers:manage"
+  | "workers:self"
   | "admin:access";
 
 const PERMISSION_MAP: Record<PermissionKey, UserRole[]> = {
@@ -87,6 +90,8 @@ const PERMISSION_MAP: Record<PermissionKey, UserRole[]> = {
   "projects:write": ["CEO", "CTO", "ADMIN", "PM"],
   "inquiries:write": ["CEO", "CTO", "ADMIN", "PM", "MARKETING"],
   "users:manage": ["CEO", "CTO", "ADMIN"],
+  "workers:manage": ["CEO", "CTO", "ADMIN", "PM"],
+  "workers:self": ["CEO", "CTO", "ADMIN", "PM", "WORKER"],
 };
 
 export function hasPermission(role: UserRole | undefined | null, perm: PermissionKey): boolean {
@@ -190,3 +195,47 @@ export const TASK_STATUS_META: Record<TaskStatus, { label: string; badgeClass: s
     badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
   },
 };
+
+export const AVAILABILITY_META: Record<
+  WorkerAvailability,
+  { label: string; badgeClass: string; dotClass: string }
+> = {
+  AVAILABLE: {
+    label: "Tersedia",
+    badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
+    dotClass: "bg-emerald-500",
+  },
+  BUSY: {
+    label: "Fokus Project",
+    badgeClass: "bg-orange-100 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300",
+    dotClass: "bg-brand-orange",
+  },
+  ON_LEAVE: {
+    label: "Cuti / Off",
+    badgeClass: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
+    dotClass: "bg-slate-400",
+  },
+};
+
+export const PAYOUT_STATUS_META: Record<PayoutStatus, { label: string; badgeClass: string }> = {
+  PENDING: {
+    label: "Menunggu Review",
+    badgeClass: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
+  },
+  APPROVED: {
+    label: "Disetujui · Siap Cair",
+    badgeClass: "bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300",
+  },
+  PAID: {
+    label: "Sudah Dicairkan",
+    badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
+  },
+};
+
+export function formatRupiah(amount: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(amount || 0);
+}

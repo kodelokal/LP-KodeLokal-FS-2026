@@ -116,6 +116,7 @@ export function RolesManager({
                 <th className="px-3 py-2.5 text-center font-bold">Portofolio</th>
                 <th className="px-3 py-2.5 text-center font-bold">Struktur Tim</th>
                 <th className="px-3 py-2.5 text-center font-bold">Project Client</th>
+                <th className="px-3 py-2.5 text-center font-bold">Worker Hub</th>
                 <th className="px-3 py-2.5 text-center font-bold">Inquiry</th>
                 <th className="px-3 py-2.5 text-center font-bold">Kelola User</th>
               </tr>
@@ -128,6 +129,7 @@ export function RolesManager({
                   hasPermission(role, "portfolio:write"),
                   hasPermission(role, "team:write"),
                   hasPermission(role, "projects:write"),
+                  hasPermission(role, "workers:self"),
                   hasPermission(role, "inquiries:write"),
                   hasPermission(role, "users:manage"),
                 ];

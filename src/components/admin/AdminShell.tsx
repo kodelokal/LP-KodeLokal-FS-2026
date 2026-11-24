@@ -45,6 +45,8 @@ export function AdminShell({
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [loggingOut, setLoggingOut] = React.useState(false);
 
+  const isWorkerOnly = user.role === "WORKER";
+
   const navGroups: { title: string; items: NavItem[] }[] = [
     {
       title: "Utama",
@@ -64,13 +66,12 @@ export function AdminShell({
           label: "Inbox Inquiry",
           icon: Inbox,
           badge: newInquiryCount > 0 ? String(newInquiryCount) : undefined,
-          show: true,
+          show: !isWorkerOnly,
         },
         {
           href: "/admin/workers",
           label: "Worker Hub",
           icon: HardHat,
-          badge: "Soon",
           show: true,
         },
       ],
@@ -82,19 +83,19 @@ export function AdminShell({
           href: "/admin/cms",
           label: "Konten & Pengaturan",
           icon: FileEdit,
-          show: true,
+          show: !isWorkerOnly,
         },
         {
           href: "/admin/portfolio",
           label: "Portofolio",
           icon: Briefcase,
-          show: true,
+          show: !isWorkerOnly,
         },
         {
           href: "/admin/team",
           label: "Struktur Tim",
           icon: Network,
-          show: true,
+          show: !isWorkerOnly,
         },
       ],
     },
@@ -105,11 +106,11 @@ export function AdminShell({
           href: "/admin/roles",
           label: "User & RBAC",
           icon: Shield,
-          show: hasPermission(user.role, "users:manage") || true,
+          show: hasPermission(user.role, "users:manage") || !isWorkerOnly,
         },
       ],
     },
-  ];
+  ].filter((g) => g.items.some((i) => i.show !== false));
 
   async function handleLogout() {
     setLoggingOut(true);

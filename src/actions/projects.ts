@@ -190,6 +190,9 @@ export async function createMilestoneAction(formData: FormData): Promise<ActionR
     const description = String(formData.get("description") || "").trim() || null;
     const dueDate = String(formData.get("dueDate") || "").trim() || null;
     const status = String(formData.get("status") || "TODO") as TaskStatus;
+    const assigneeId = String(formData.get("assigneeId") || "").trim() || null;
+    const feeAmount = Math.max(0, Number(formData.get("feeAmount") || 0) || 0);
+    const estimatedHours = Math.max(0, Number(formData.get("estimatedHours") || 0) || 0);
 
     if (!projectId || !title) {
       return { ok: false, message: "Judul milestone wajib diisi." };
@@ -201,6 +204,9 @@ export async function createMilestoneAction(formData: FormData): Promise<ActionR
       description,
       status,
       dueDate,
+      assigneeId,
+      feeAmount,
+      estimatedHours,
       completedAt: status === "DONE" ? new Date() : null,
     });
 
@@ -208,6 +214,7 @@ export async function createMilestoneAction(formData: FormData): Promise<ActionR
 
     revalidatePath(`/admin/projects/${projectId}`);
     revalidatePath("/admin/projects");
+    revalidatePath("/admin/workers");
     revalidatePath("/track");
     return { ok: true, message: "Milestone berhasil ditambahkan!" };
   } catch (err) {
@@ -228,6 +235,9 @@ export async function updateMilestoneAction(formData: FormData): Promise<ActionR
     const description = String(formData.get("description") || "").trim() || null;
     const dueDate = String(formData.get("dueDate") || "").trim() || null;
     const status = String(formData.get("status") || "TODO") as TaskStatus;
+    const assigneeId = String(formData.get("assigneeId") || "").trim() || null;
+    const feeAmount = Math.max(0, Number(formData.get("feeAmount") || 0) || 0);
+    const estimatedHours = Math.max(0, Number(formData.get("estimatedHours") || 0) || 0);
 
     if (!id || !projectId || !title) {
       return { ok: false, message: "Judul milestone wajib diisi." };
@@ -240,6 +250,9 @@ export async function updateMilestoneAction(formData: FormData): Promise<ActionR
         description,
         dueDate,
         status,
+        assigneeId,
+        feeAmount,
+        estimatedHours,
         completedAt: status === "DONE" ? new Date() : null,
       })
       .where(eq(projectMilestones.id, id));
@@ -248,6 +261,7 @@ export async function updateMilestoneAction(formData: FormData): Promise<ActionR
 
     revalidatePath(`/admin/projects/${projectId}`);
     revalidatePath("/admin/projects");
+    revalidatePath("/admin/workers");
     revalidatePath("/track");
     return { ok: true, message: "Milestone berhasil diperbarui!" };
   } catch (err) {
