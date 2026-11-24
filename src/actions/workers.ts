@@ -8,11 +8,13 @@ import {
   workerProfiles,
   workerWorkLogs,
   workerPayouts,
+  workerApplications,
   projectMilestones,
   clientProjects,
   type WorkerAvailability,
   type PayoutStatus,
   type TaskStatus,
+  type ApplicationStatus,
 } from "@/db/schema";
 import { hashPassword, requireAuth, requirePermission } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
@@ -511,6 +513,159 @@ export async function deletePayoutAction(id: string): Promise<ActionResult> {
     return {
       ok: false,
       message: err instanceof Error ? err.message : "Gagal menghapus payout.",
+    };
+  }
+}
+
+/**
+ * 1-Click Approve Worker Application -> Auto-create User (role WORKER) + Worker Profile
+ */
+export async function approveWorkerApplicationAction(
+  applicationId: string,
+  reviewNote?: string
+): Promise<ActionResult> {
+  try {
+    const actor = await requirePermission("workers:manage");
+
+    const [app] = await db
+      .select()
+      .from(workerApplications)
+      .where(eq(workerApplications.id, applicationId))
+      .limit(1);
+
+    if (!app) return { ok: false, message: "Data pendaftar tidak ditemukan." };
+    if (app.status === "APPROVED" && app.createdUserId) {
+      return { ok: false, message: "Pendaftar ini sudah disetujui sebelumnya." };
+    }
+
+    // Check if user with this email already exists
+    const existingUsers = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, app.email.toLowerCase()))
+      .limit(1);
+
+    let workerUserId: string;
+    if (existingUsers.length > 0) {
+      workerUserId = existingUsers[0].id;
+      await db
+        .update(users)
+        .set({ isActive: true, title: app.specialty, updatedAt: new Date() })
+        .where(eq(users.id, workerUserId));
+    } else {
+      const [created] = await db
+        .insert(users)
+        .values({
+          name: app.name,
+          email: app.email.toLowerCase(),
+          passwordHash: app.passwordHash,
+          role: "WORKER",
+          title: app.specialty,
+          isActive: true,
+        })
+        .returning({ id: users.id });
+      workerUserId = created.id;
+    }
+
+    await db
+      .insert(workerProfiles)
+      .values({
+        userId: workerUserId,
+        specialty: app.specialty,
+        skills: app.skills ?? [],
+        availability: "AVAILABLE",
+        hourlyRate: app.expectedHourlyRate ?? 0,
+        portfolioUrl: app.portfolioUrl || app.githubUrl || app.linkedinUrl,
+        notes: `Bergabung lewat formulir /join (${app.applicationCode}) · ${app.experienceLevel} · WA: ${app.phone}`,
+      })
+      .onConflictDoUpdate({
+        target: workerProfiles.userId,
+        set: {
+          specialty: app.specialty,
+          skills: app.skills ?? [],
+          hourlyRate: app.expectedHourlyRate ?? 0,
+          portfolioUrl: app.portfolioUrl || app.githubUrl || app.linkedinUrl,
+          updatedAt: new Date(),
+        },
+      });
+
+    await db
+      .update(workerApplications)
+      .set({
+        status: "APPROVED",
+        reviewNote: reviewNote?.trim() || "Selamat bergabung di squad Worker KodeLokal! Silakan login di /login menggunakan email & password pendaftaranmu.",
+        reviewedById: actor.id,
+        createdUserId: workerUserId,
+        reviewedAt: new Date(),
+      })
+      .where(eq(workerApplications.id, applicationId));
+
+    revalidatePath("/admin/workers");
+    revalidatePath("/admin/roles");
+    revalidatePath("/admin");
+    return {
+      ok: true,
+      message: `Selamat! Akun Worker "${app.name}" aktif & siap login di /login.`,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Gagal menyetujui pendaftar worker.",
+    };
+  }
+}
+
+export async function updateWorkerApplicationStatusAction(
+  applicationId: string,
+  status: Exclude<ApplicationStatus, "APPROVED">,
+  reviewNote?: string
+): Promise<ActionResult> {
+  try {
+    const actor = await requirePermission("workers:manage");
+    if (!applicationId) return { ok: false, message: "ID pendaftar tidak valid." };
+
+    await db
+      .update(workerApplications)
+      .set({
+        status,
+        reviewNote: reviewNote?.trim() || null,
+        reviewedById: actor.id,
+        reviewedAt: new Date(),
+      })
+      .where(eq(workerApplications.id, applicationId));
+
+    revalidatePath("/admin/workers");
+    revalidatePath("/admin");
+    return {
+      ok: true,
+      message:
+        status === "INTERVIEW"
+          ? "Status diubah ke Tahap Ngobrol / Tes!"
+          : status === "REJECTED"
+            ? "Lamaran ditandai Belum Cocok."
+            : "Status lamaran dikembalikan ke Menunggu Review.",
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Gagal memperbarui status lamaran.",
+    };
+  }
+}
+
+export async function deleteWorkerApplicationAction(id: string): Promise<ActionResult> {
+  try {
+    await requirePermission("workers:manage");
+    if (!id) return { ok: false, message: "ID pendaftar tidak valid." };
+
+    await db.delete(workerApplications).where(eq(workerApplications.id, id));
+    revalidatePath("/admin/workers");
+    revalidatePath("/admin");
+    return { ok: true, message: "Data pendaftar berhasil dihapus." };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Gagal menghapus data pendaftar.",
     };
   }
 }

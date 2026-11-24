@@ -33,7 +33,11 @@ function LoginFormInner() {
       if (!res.ok) {
         setError(data.error || "Login gagal.");
       } else {
-        router.push(nextPath.startsWith("/admin") ? nextPath : "/admin");
+        const defaultDest = data.user?.role === "WORKER" ? "/admin/workers" : "/admin";
+        const target = searchParams.get("next") && nextPath.startsWith("/admin")
+          ? nextPath
+          : defaultDest;
+        router.push(target);
         router.refresh();
       }
     } catch {
@@ -146,6 +150,13 @@ function LoginFormInner() {
                 )}
               </button>
             </form>
+
+            <div className="mt-6 border-t border-line pt-5 text-center text-xs text-ink-secondary">
+              Belum punya akun &amp; ingin gabung sebagai developer / desainer?{" "}
+              <Link href="/join" className="font-bold text-brand-blue hover:text-brand-orange">
+                Daftar Jadi Worker →
+              </Link>
+            </div>
           </div>
         </div>
       </main>

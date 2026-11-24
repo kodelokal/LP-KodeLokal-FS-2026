@@ -34,10 +34,12 @@ type NavItem = {
 export function AdminShell({
   user,
   newInquiryCount,
+  pendingWorkerAppsCount = 0,
   children,
 }: {
   user: SafeUser;
   newInquiryCount: number;
+  pendingWorkerAppsCount?: number;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -72,6 +74,7 @@ export function AdminShell({
           href: "/admin/workers",
           label: "Worker Hub",
           icon: HardHat,
+          badge: pendingWorkerAppsCount > 0 ? String(pendingWorkerAppsCount) : undefined,
           show: true,
         },
       ],

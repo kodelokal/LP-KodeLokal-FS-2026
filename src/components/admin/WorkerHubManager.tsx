@@ -18,6 +18,9 @@ import {
   ExternalLink,
   Calendar,
   Building2,
+  UserPlus,
+  MessageCircle,
+  XCircle,
 } from "lucide-react";
 import type {
   ClientProject,
@@ -25,6 +28,7 @@ import type {
   WorkerProfile,
   WorkerWorkLog,
   WorkerPayout,
+  WorkerApplication,
   TaskStatus,
   PayoutStatus,
   UserRole,
@@ -33,6 +37,7 @@ import {
   TASK_STATUS_META,
   AVAILABILITY_META,
   PAYOUT_STATUS_META,
+  APPLICATION_STATUS_META,
   ROLE_META,
   formatRupiah,
 } from "@/lib/rbac";
@@ -47,6 +52,9 @@ import {
   generatePayoutFromMilestoneAction,
   updatePayoutStatusAction,
   deletePayoutAction,
+  approveWorkerApplicationAction,
+  updateWorkerApplicationStatusAction,
+  deleteWorkerApplicationAction,
 } from "@/actions/workers";
 import { deleteMilestoneAction } from "@/actions/projects";
 import {
@@ -66,7 +74,9 @@ export type WorkerDirectoryEntry = {
   profile: WorkerProfile | null;
 };
 
-type HubTab = "tasks" | "directory" | "timesheet" | "payouts";
+export type SafeWorkerApplication = Omit<WorkerApplication, "passwordHash">;
+
+type HubTab = "tasks" | "directory" | "timesheet" | "payouts" | "applications";
 
 const TASK_COLUMNS: { key: TaskStatus; label: string; accent: string }[] = [
   { key: "TODO", label: "Menunggu", accent: "bg-slate-400" },
@@ -101,6 +111,7 @@ export function WorkerHubManager({
   milestones,
   workLogs,
   payouts,
+  applications = [],
 }: {
   actorId: string;
   actorRole: UserRole;
@@ -110,6 +121,7 @@ export function WorkerHubManager({
   milestones: ProjectMilestone[];
   workLogs: WorkerWorkLog[];
   payouts: WorkerPayout[];
+  applications?: SafeWorkerApplication[];
 }) {
   const router = useRouter();
   const { toast, showToast, clearToast } = useAdminToast();
@@ -124,10 +136,13 @@ export function WorkerHubManager({
   const [taskModal, setTaskModal] = React.useState<"create" | ProjectMilestone | null>(null);
   const [workLogOpen, setWorkLogOpen] = React.useState(false);
   const [payoutOpen, setPayoutOpen] = React.useState(false);
+  const [reviewingApp, setReviewingApp] = React.useState<SafeWorkerApplication | null>(null);
+  const [reviewNote, setReviewNote] = React.useState("");
   const [deleteTarget, setDeleteTarget] = React.useState<
     | { kind: "milestone"; item: ProjectMilestone }
     | { kind: "worklog"; item: WorkerWorkLog }
     | { kind: "payout"; item: WorkerPayout }
+    | { kind: "application"; item: SafeWorkerApplication }
     | null
   >(null);
 
@@ -307,6 +322,40 @@ export function WorkerHubManager({
     }
   }
 
+  async function handleApproveApp(app: SafeWorkerApplication, note?: string) {
+    setSubmitting(true);
+    try {
+      const res = await approveWorkerApplicationAction(app.id, note);
+      showToast(res.ok ? "success" : "error", res.message);
+      if (res.ok) {
+        setReviewingApp(null);
+        setReviewNote("");
+        router.refresh();
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleUpdateAppStatus(
+    app: SafeWorkerApplication,
+    status: "PENDING" | "INTERVIEW" | "REJECTED",
+    note?: string
+  ) {
+    setSubmitting(true);
+    try {
+      const res = await updateWorkerApplicationStatusAction(app.id, status, note);
+      showToast(res.ok ? "success" : "error", res.message);
+      if (res.ok) {
+        setReviewingApp(null);
+        setReviewNote("");
+        router.refresh();
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   async function handleConfirmDelete() {
     if (!deleteTarget) return;
     setSubmitting(true);
@@ -316,7 +365,9 @@ export function WorkerHubManager({
           ? await deleteMilestoneAction(deleteTarget.item.id, deleteTarget.item.projectId)
           : deleteTarget.kind === "worklog"
             ? await deleteWorkLogAction(deleteTarget.item.id)
-            : await deletePayoutAction(deleteTarget.item.id);
+            : deleteTarget.kind === "payout"
+              ? await deletePayoutAction(deleteTarget.item.id)
+              : await deleteWorkerApplicationAction(deleteTarget.item.id);
       if (res.ok) {
         setDeleteTarget(null);
         showToast("success", res.message);
@@ -329,11 +380,32 @@ export function WorkerHubManager({
     }
   }
 
-  const tabs: { id: HubTab; label: string; icon: React.ComponentType<{ className?: string }>; count?: number }[] = [
+  const pendingAppsCount = applications.filter(
+    (a) => a.status === "PENDING" || a.status === "INTERVIEW"
+  ).length;
+
+  const tabs: {
+    id: HubTab;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    count?: number;
+    highlight?: boolean;
+  }[] = [
     { id: "tasks", label: "Task Board", icon: KanbanSquare, count: activeTaskCount },
     { id: "directory", label: "Direktori & Beban Kerja", icon: Users, count: workers.length },
     { id: "timesheet", label: "Timesheet", icon: Clock, count: visibleWorkLogs.length },
     { id: "payouts", label: "Komisi & Payout", icon: Wallet, count: visiblePayouts.length },
+    ...(canManage
+      ? [
+          {
+            id: "applications" as HubTab,
+            label: "Pendaftar Baru",
+            icon: UserPlus,
+            count: pendingAppsCount > 0 ? pendingAppsCount : applications.length,
+            highlight: pendingAppsCount > 0,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -457,7 +529,11 @@ export function WorkerHubManager({
               {typeof tab.count === "number" && (
                 <span
                   className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] ${
-                    active ? "bg-white/20 text-white" : "bg-subtle text-ink-muted"
+                    active
+                      ? "bg-white/20 text-white"
+                      : tab.highlight
+                        ? "bg-brand-orange text-white"
+                        : "bg-subtle text-ink-muted"
                   }`}
                 >
                   {tab.count}
@@ -1009,6 +1085,178 @@ export function WorkerHubManager({
               <div className="py-10 text-center text-sm text-ink-muted">
                 Belum ada riwayat komisi atau payout. Selesaikan milestone ber-fee di Task Board
                 atau klik &ldquo;Catat Komisi / Payout&rdquo;.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ==================== TAB 5: PENDAFTAR WORKER BARU ==================== */}
+      {activeTab === "applications" && canManage && (
+        <div className="surface-card rounded-3xl p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-bold text-ink">
+                Daftar Pendaftar Worker ({applications.length})
+              </h2>
+              <p className="text-xs text-ink-secondary">
+                Calon worker yang mendaftar dari halaman publik{" "}
+                <code className="rounded bg-subtle px-1.5 py-0.5 font-mono text-[11px]">/join</code>{" "}
+                masuk ke sini. Klik <strong>Review &amp; Setujui</strong> untuk mengaktifkan akun
+                login Worker mereka dalam 1 klik.
+              </p>
+            </div>
+            <Link
+              href="/join"
+              target="_blank"
+              className="btn-secondary px-3.5 py-2 text-xs"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-brand-blue" />
+              Buka Halaman Daftar (/join)
+            </Link>
+          </div>
+
+          <div className="mt-5 space-y-4">
+            {applications.map((app) => {
+              const statusMeta = APPLICATION_STATUS_META[app.status];
+              const waClean = app.phone.replace(/\D/g, "").replace(/^0/, "62");
+              const waLink = `https://wa.me/${waClean}?text=${encodeURIComponent(
+                `Halo ${app.name}, ini mimin dari KodeLokal terkait pendaftaran Worker kamu (${app.applicationCode}).`
+              )}`;
+
+              return (
+                <div
+                  key={app.id}
+                  className="rounded-2xl border border-line bg-elevated/50 p-5"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-md bg-subtle px-2 py-0.5 font-mono text-[11px] font-bold text-brand-blue">
+                          {app.applicationCode}
+                        </span>
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusMeta.badgeClass}`}
+                        >
+                          {statusMeta.label}
+                        </span>
+                        <span className="rounded-md bg-surface px-2 py-0.5 text-[11px] font-semibold text-ink-secondary">
+                          {app.experienceLevel}
+                        </span>
+                        {app.expectedHourlyRate > 0 && (
+                          <span className="font-mono text-[11px] font-bold text-brand-orange">
+                            Harapan: {formatRupiah(app.expectedHourlyRate)}/jam
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="mt-2 text-base font-extrabold text-ink">
+                        {app.name}{" "}
+                        <span className="text-xs font-semibold text-brand-orange">
+                          · {app.specialty}
+                        </span>
+                      </h3>
+                      <p className="mt-0.5 text-xs text-ink-secondary">
+                        {app.email} · WA: {app.phone}
+                      </p>
+
+                      {(app.skills ?? []).length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {app.skills.map((s) => (
+                            <span
+                              key={s}
+                              className="rounded-md bg-surface px-2 py-0.5 font-mono text-[10px] font-medium text-ink-secondary"
+                            >
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="mt-3 rounded-xl bg-surface p-3 text-xs leading-relaxed text-ink">
+                        {app.bio}
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+                        {app.githubUrl && (
+                          <a
+                            href={app.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 font-semibold text-brand-blue hover:underline"
+                          >
+                            GitHub <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                        {app.portfolioUrl && (
+                          <a
+                            href={app.portfolioUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 font-semibold text-brand-orange hover:underline"
+                          >
+                            Portofolio <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                        {app.linkedinUrl && (
+                          <a
+                            href={app.linkedinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 font-semibold text-brand-blue hover:underline"
+                          >
+                            LinkedIn <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-secondary px-3 py-1.5 text-xs"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5 text-emerald-500" />
+                        Chat WA
+                      </a>
+
+                      {app.status !== "APPROVED" && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReviewingApp(app);
+                            setReviewNote(app.reviewNote ?? "");
+                          }}
+                          className="btn-primary px-3.5 py-1.5 text-xs"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Review &amp; Keputusan
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget({ kind: "application", item: app })}
+                        aria-label={`Hapus pendaftar ${app.name}`}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {applications.length === 0 && (
+              <div className="py-10 text-center text-sm text-ink-muted">
+                Belum ada pendaftar worker baru. Bagikan tautan{" "}
+                <Link href="/join" target="_blank" className="font-bold text-brand-blue underline">
+                  kodelokal.store/join
+                </Link>{" "}
+                ke calon developer/desainer!
               </div>
             )}
           </div>
@@ -1573,6 +1821,89 @@ export function WorkerHubManager({
         </form>
       </AdminModal>
 
+      {/* ==================== MODAL 6: REVIEW WORKER APPLICATION ==================== */}
+      <AdminModal
+        open={Boolean(reviewingApp)}
+        onClose={() => !submitting && setReviewingApp(null)}
+        title="Review Pendaftar Worker"
+        subtitle={
+          reviewingApp
+            ? `${reviewingApp.name} (${reviewingApp.applicationCode}) · ${reviewingApp.specialty}`
+            : undefined
+        }
+        maxWidth="max-w-lg"
+      >
+        {reviewingApp && (
+          <div className="space-y-4">
+            <div className="rounded-2xl bg-elevated p-4 text-xs text-ink-secondary">
+              <p className="font-bold text-ink">{reviewingApp.name}</p>
+              <p className="mt-0.5">
+                {reviewingApp.email} · {reviewingApp.phone}
+              </p>
+              <p className="mt-2 leading-relaxed text-ink">{reviewingApp.bio}</p>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-bold text-ink">
+                Catatan untuk Pendaftar (tampil saat pendaftar cek status di /join)
+              </label>
+              <textarea
+                rows={3}
+                value={reviewNote}
+                onChange={(e) => setReviewNote(e.target.value)}
+                placeholder="Mis. Jadwal ngobrol via Google Meet hari Kamis jam 19.00 WIB, atau pesan selamat bergabung!"
+                className="input-field"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4">
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => handleUpdateAppStatus(reviewingApp, "REJECTED", reviewNote)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 disabled:opacity-60 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
+              >
+                <XCircle className="h-3.5 w-3.5" />
+                Tolak
+              </button>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => handleUpdateAppStatus(reviewingApp, "INTERVIEW", reviewNote)}
+                  className="btn-blue px-3.5 py-2 text-xs disabled:opacity-60"
+                >
+                  {submitting ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    "Tahap Interview"
+                  )}
+                </button>
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => handleApproveApp(reviewingApp, reviewNote)}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Mengaktifkan...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Setujui &amp; Aktifkan Akun
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </AdminModal>
+
       {/* ==================== DELETE CONFIRM MODAL ==================== */}
       <ConfirmDeleteModal
         open={Boolean(deleteTarget)}
@@ -1587,7 +1918,9 @@ export function WorkerHubManager({
               ? "Hapus entri timesheet jam kerja ini?"
               : deleteTarget?.kind === "payout"
                 ? `Hapus catatan komisi "${deleteTarget.item.title}"?`
-                : "Yakin ingin menghapus data ini?"
+                : deleteTarget?.kind === "application"
+                  ? `Hapus data pendaftaran dari "${deleteTarget.item.name}"?`
+                  : "Yakin ingin menghapus data ini?"
         }
       />
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Compass, ShieldCheck } from "lucide-react";
+import { Compass, ShieldCheck, UserPlus } from "lucide-react";
 import type { SiteSettings } from "@/db/schema";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
@@ -126,9 +126,15 @@ export function Footer({ settings }: { settings: SiteSettings }) {
                 </Link>
               </li>
               <li>
+                <Link href="/join" className="inline-flex items-center gap-2 hover:text-brand-orange">
+                  <UserPlus className="h-4 w-4 text-brand-blue" />
+                  Gabung Jadi Worker KodeLokal
+                </Link>
+              </li>
+              <li>
                 <Link href="/login" className="inline-flex items-center gap-2 hover:text-brand-blue">
                   <ShieldCheck className="h-4 w-4 text-brand-blue" />
-                  Login Portal Tim & CMS
+                  Login Portal Tim &amp; CMS
                 </Link>
               </li>
               <li className="pt-2 text-xs text-ink-muted">

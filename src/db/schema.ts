@@ -69,6 +69,13 @@ export const payoutStatusEnum = pgEnum("payout_status", [
   "PAID",
 ]);
 
+export const applicationStatusEnum = pgEnum("worker_application_status", [
+  "PENDING",
+  "INTERVIEW",
+  "APPROVED",
+  "REJECTED",
+]);
+
 // ============================================================================
 // AUTH & RBAC TABLES
 // ============================================================================
@@ -310,6 +317,29 @@ export const workerPayouts = pgTable("worker_payouts", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const workerApplications = pgTable("worker_applications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  applicationCode: text("application_code").notNull().unique(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  specialty: text("specialty").notNull().default("Full-Stack Developer"),
+  experienceLevel: text("experience_level").notNull().default("Mid-Level (1–3 thn)"),
+  skills: jsonb("skills").$type<string[]>().notNull().default([]),
+  portfolioUrl: text("portfolio_url"),
+  githubUrl: text("github_url"),
+  linkedinUrl: text("linkedin_url"),
+  expectedHourlyRate: integer("expected_hourly_rate").notNull().default(0),
+  bio: text("bio").notNull(),
+  status: applicationStatusEnum("status").notNull().default("PENDING"),
+  reviewNote: text("review_note"),
+  reviewedById: uuid("reviewed_by_id").references(() => users.id, { onDelete: "set null" }),
+  createdUserId: uuid("created_user_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+});
+
 export const inquiries = pgTable("inquiries", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
@@ -412,6 +442,7 @@ export type InquiryStatus = (typeof inquiryStatusEnum.enumValues)[number];
 export type TaskStatus = (typeof taskStatusEnum.enumValues)[number];
 export type WorkerAvailability = (typeof workerAvailabilityEnum.enumValues)[number];
 export type PayoutStatus = (typeof payoutStatusEnum.enumValues)[number];
+export type ApplicationStatus = (typeof applicationStatusEnum.enumValues)[number];
 export type SiteSettings = typeof siteSettings.$inferSelect;
 export type Service = typeof services.$inferSelect;
 export type Portfolio = typeof portfolios.$inferSelect;
@@ -423,4 +454,5 @@ export type ProjectMilestone = typeof projectMilestones.$inferSelect;
 export type WorkerProfile = typeof workerProfiles.$inferSelect;
 export type WorkerWorkLog = typeof workerWorkLogs.$inferSelect;
 export type WorkerPayout = typeof workerPayouts.$inferSelect;
+export type WorkerApplication = typeof workerApplications.$inferSelect;
 export type Inquiry = typeof inquiries.$inferSelect;

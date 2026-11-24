@@ -6,6 +6,7 @@ import type {
   TaskStatus,
   WorkerAvailability,
   PayoutStatus,
+  ApplicationStatus,
 } from "@/db/schema";
 
 export const ALL_ROLES: UserRole[] = [
@@ -229,6 +230,32 @@ export const PAYOUT_STATUS_META: Record<PayoutStatus, { label: string; badgeClas
   PAID: {
     label: "Sudah Dicairkan",
     badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
+  },
+};
+
+export const APPLICATION_STATUS_META: Record<
+  ApplicationStatus,
+  { label: string; badgeClass: string; desc: string }
+> = {
+  PENDING: {
+    label: "Menunggu Review",
+    badgeClass: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
+    desc: "Lamaran kamu sudah diterima dan sedang ditinjau oleh tim CTO / PM KodeLokal.",
+  },
+  INTERVIEW: {
+    label: "Tahap Ngobrol / Tes",
+    badgeClass: "bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300",
+    desc: "Mimin tertarik! Tim KodeLokal bakal menghubungi kamu via WhatsApp untuk sesi kenalan singkat.",
+  },
+  APPROVED: {
+    label: "Diterima · Akun Aktif",
+    badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300",
+    desc: "Selamat bergabung! Akun Worker kamu sudah aktif dan bisa langsung login ke Worker Hub.",
+  },
+  REJECTED: {
+    label: "Belum Cocok Saat Ini",
+    badgeClass: "bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300",
+    desc: "Terima kasih sudah melamar. Saat ini posisi belum cocok, tapi kamu tetap bisa daftar lagi di kesempatan berikutnya.",
   },
 };
 

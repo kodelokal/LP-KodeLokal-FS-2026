@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Network, LayoutGrid } from "lucide-react";
+import { Network, LayoutGrid, ArrowRight } from "lucide-react";
 import type { TeamMember } from "@/db/schema";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
@@ -273,6 +274,20 @@ export function TeamStructureSection({ members }: { members: TeamMember[] }) {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Join Worker CTA */}
+        <div className="mt-12 flex justify-center">
+          <Link
+            href="/join"
+            className="surface-card surface-card-interactive inline-flex flex-wrap items-center justify-center gap-3 rounded-full px-6 py-3 text-xs font-semibold text-ink-secondary sm:text-sm"
+          >
+            <span>Tertarik ikut ngoding &amp; gabung jadi Worker KodeLokal?</span>
+            <span className="inline-flex items-center gap-1 font-bold text-brand-orange">
+              Daftar Jadi Worker
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </Link>
         </div>
       </div>
     </section>
